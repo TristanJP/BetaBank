@@ -11,17 +11,20 @@ cap.set(4, 720)
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
-    frame = cv2.flip(frame,1)
+    # frame = cv2.flip(frame,1)
 
     # Post Processing
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
-    parameters =  aruco.DetectorParameters_create()
-    corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
-    frame_markers = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
+    #parameters =  aruco.DetectorParameters_create()
+    corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, aruco_dict)
+    frame_markers = aruco.drawDetectedMarkers(frame.copy(), rejectedImgPoints)
+    frame_markers = aruco.drawDetectedMarkers(frame_markers.copy(), corners, ids)
+    
+
 
     # Display the resulting frame
-    cv2.imshow('frame',frame)
+    cv2.imshow('frame',frame_markers)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
