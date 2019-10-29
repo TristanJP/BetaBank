@@ -18,9 +18,8 @@ while(True):
     aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
     #parameters =  aruco.DetectorParameters_create()
     corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, aruco_dict)
-    frame_markers = aruco.drawDetectedMarkers(frame.copy(), rejectedImgPoints)
-    frame_markers = aruco.drawDetectedMarkers(frame_markers.copy(), corners, ids)
-    
+    frame_markers = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
+    #frame_markers = aruco.drawDetectedMarkers(frame_markers.copy(), rejectedImgPoints)
 
 
     # Display the resulting frame
