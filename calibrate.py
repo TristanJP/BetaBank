@@ -157,11 +157,6 @@ class Calibrate:
 
         frame_markers = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
-        # plt.figure()
-        # plt.imshow(frame_markers, interpolation = "nearest")
-
-        # plt.show()
-
         size_of_marker =  0.0285 # side lenght of the marker in meters
         rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , camera_matrix, distortion_coefficients0)
 
@@ -192,10 +187,10 @@ class Calibrate:
 
             frame_markers = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
-            size_of_marker =  0.0285 # side lenght of the marker in meters
+            size_of_marker =  0.0125 # side lenght of the marker in meters
             rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , camera_matrix, distortion_coefficients0)
 
-            length_of_axis = 0.1
+            length_of_axis = 0.025
             imaxis = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
             if tvecs is not None:
