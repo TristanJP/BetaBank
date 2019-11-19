@@ -3,6 +3,7 @@ import cv2
 from cv2 import aruco
 import numpy as np
 from glob import glob
+from matplotlib import pyplot as plt
 
 class Calibrate:
     aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
@@ -29,14 +30,17 @@ class Calibrate:
         cap.release()
         cv2.destroyAllWindows()
 
-    def take_pictures(self):
+    def take_pictures(self, grayscale):
         cap = self.capture_camera()
         i = 0
 
         while True:
             # Capture frame-by-frame
             ret, frame = cap.read()
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            if grayscale:
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            else:
+                gray = frame
 
             # get corners
             corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.aruco_dict)
@@ -47,7 +51,7 @@ class Calibrate:
 
             if cv2.waitKey(1) & 0xFF == ord(' '):
                 
-                cv2.imwrite(f"calibration_images/capture_{i}.png", gray)
+                cv2.imwrite(f"{self.CALIBRATION_IMAGE_PATH}/capture_{i}.png", gray)
                 i += 1
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -56,7 +60,6 @@ class Calibrate:
         self.release_camera(cap)
 
     def get_calibration_images(self):
-
         fnames = glob(f"{self.CALIBRATION_IMAGE_PATH}/*.png")
         #fnames = [f for f in glob("calibration_images/*.png")]
         return fnames
@@ -99,7 +102,6 @@ class Calibrate:
 
     def calibrate_camera(self):
         # Calibrates the camera using the dected corners.
-
         all_corners, all_ids, imsize = self.read_chessboards()
         
         print("CAMERA CALIBRATION")
@@ -128,7 +130,6 @@ class Calibrate:
 
     # show images
     def show_images(self, images: list):
-
         while True:
             i = 0
             for image in images:
@@ -143,17 +144,84 @@ class Calibrate:
         img_undist = cv2.undistort(frame,camera_matrix,distortion_coefficients0,None)
         return [frame, img_undist]
 
+    def show_pose_for_image(self, image):
+        frame = cv2.imread(f"{self.CALIBRATION_IMAGE_PATH}/{image}")
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        parameters =  aruco.DetectorParameters_create()
+        corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.aruco_dict,
+                                                            parameters=parameters)
+        # SUB PIXEL DETECTION
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.0001)
+        for corner in corners:
+            cv2.cornerSubPix(gray, corner, winSize = (3,3), zeroZone = (-1,-1), criteria = criteria)
+
+        frame_markers = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
+
+        # plt.figure()
+        # plt.imshow(frame_markers, interpolation = "nearest")
+
+        # plt.show()
+
+        size_of_marker =  0.0285 # side lenght of the marker in meters
+        rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , camera_matrix, distortion_coefficients0)
+
+        length_of_axis = 0.1
+        imaxis = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
+
+        for i in range(len(tvecs)):
+            imaxis = aruco.drawAxis(imaxis, camera_matrix, distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
+
+        plt.figure()
+        plt.imshow(imaxis)
+        plt.grid()
+        plt.show()
+
+    def show_pose(self):
+        cap = self.capture_camera()
+
+        while True:
+            ret, frame = cap.read()
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            parameters =  aruco.DetectorParameters_create()
+            corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.aruco_dict,
+                                                                parameters=parameters)
+            # SUB PIXEL DETECTION
+            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.0001)
+            for corner in corners:
+                cv2.cornerSubPix(gray, corner, winSize = (3,3), zeroZone = (-1,-1), criteria = criteria)
+
+            frame_markers = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
+
+            size_of_marker =  0.0285 # side lenght of the marker in meters
+            rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , camera_matrix, distortion_coefficients0)
+
+            length_of_axis = 0.1
+            imaxis = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
+
+            if tvecs is not None:
+                for i in range(len(tvecs)):
+                    imaxis = aruco.drawAxis(imaxis, camera_matrix, distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
+
+            cv2.imshow("frame", imaxis)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        
 
 # =================================
 # Run Calibration
 
+# Calibrate based on images
 cal = Calibrate("calibration_images")
 
-#cal.take_pictures()
+#cal.take_pictures(False)
 
 ret, camera_matrix, distortion_coefficients0, rotation_vectors, translation_vectors = cal.calibrate_camera()
 
-undist = cal.get_undistorted_image(f"{cal.CALIBRATION_IMAGE_PATH}/capture_3.png")
+#undist = cal.get_undistorted_image(f"{cal.CALIBRATION_IMAGE_PATH}/capture_4.png")
+#cal.show_images(undist)
 
-cal.show_images(undist)
+#cal.show_pose_for_image("capture_1.png")
+
+cal.show_pose()
+
 
