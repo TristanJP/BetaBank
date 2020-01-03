@@ -6,7 +6,7 @@ cap = cv2.VideoCapture(0)
 cap.set(3, 1280)
 cap.set(4, 720)
 
-img = cv2.imread("thai.jpg")
+img = cv2.imread("images/thai.jpg")
 alpha = 0.4
 
 while(True):

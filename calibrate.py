@@ -6,12 +6,20 @@ from glob import glob
 from matplotlib import pyplot as plt
 
 class Calibrate:
-    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-    board = cv2.aruco.CharucoBoard_create(7,9,.025,.0125, aruco_dict)
+    calibrate_aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+    search_aruco_dict: None
+    board = cv2.aruco.CharucoBoard_create(7,9,.025,.0125, calibrate_aruco_dict)
     CALIBRATION_IMAGE_PATH: str
 
-    def __init__(self, path):
+    ret: None
+    camera_matrix: None
+    distortion_coefficients0: None
+    rotation_vectors: None
+    translation_vectors: None
+
+    def __init__(self, path, search_aruco_dict):
         self.CALIBRATION_IMAGE_PATH = path
+        self.search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
 
     # CREATE CHARUCO BOARD
     def generate_charuco_board(self):
@@ -43,7 +51,7 @@ class Calibrate:
                 gray = frame
 
             # get corners
-            corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.aruco_dict)
+            corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.calibrate_aruco_dict)
             frame_markers = aruco.drawDetectedMarkers(gray.copy(), corners, ids)
 
             cv2.imshow('frame',frame_markers)
@@ -81,7 +89,7 @@ class Calibrate:
             print(f"=> Processing image {im}")
             frame = cv2.imread(im)
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, self.aruco_dict)
+            corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, self.calibrate_aruco_dict)
 
             if len(corners)>0:
                 # SUB PIXEL DETECTION
@@ -126,6 +134,11 @@ class Calibrate:
                         flags=flags,
                         criteria=(cv2.TERM_CRITERIA_EPS & cv2.TERM_CRITERIA_COUNT, 10000, 1e-9))
 
+        self.ret = ret
+        self.camera_matrix = camera_matrix
+        self.distortion_coefficients0 = distortion_coefficients0
+        self.rotation_vectors = rotation_vectors
+        self.translation_vectors = translation_vectors
         return ret, camera_matrix, distortion_coefficients0, rotation_vectors, translation_vectors
 
     # show images
@@ -141,14 +154,14 @@ class Calibrate:
 
     def get_undistorted_image(self, fname: str) -> list:
         frame = cv2.imread(fname)
-        img_undist = cv2.undistort(frame,camera_matrix,distortion_coefficients0,None)
+        img_undist = cv2.undistort(frame, self.camera_matrix, self.distortion_coefficients0, None)
         return [frame, img_undist]
 
     def show_pose_for_image(self, image):
         frame = cv2.imread(f"{self.CALIBRATION_IMAGE_PATH}/{image}")
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         parameters =  aruco.DetectorParameters_create()
-        corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.aruco_dict,
+        corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.search_aruco_dict,
                                                             parameters=parameters)
         # SUB PIXEL DETECTION
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.0001)
@@ -158,13 +171,13 @@ class Calibrate:
         frame_markers = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
         size_of_marker =  0.0285 # side lenght of the marker in meters
-        rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , camera_matrix, distortion_coefficients0)
+        rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , self.camera_matrix, self.distortion_coefficients0)
 
         length_of_axis = 0.1
         imaxis = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
         for i in range(len(tvecs)):
-            imaxis = aruco.drawAxis(imaxis, camera_matrix, distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
+            imaxis = aruco.drawAxis(imaxis, self.camera_matrix, self.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
 
         plt.figure()
         plt.imshow(imaxis)
@@ -178,7 +191,7 @@ class Calibrate:
             ret, frame = cap.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             parameters =  aruco.DetectorParameters_create()
-            corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.aruco_dict,
+            corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.search_aruco_dict,
                                                                 parameters=parameters)
             # SUB PIXEL DETECTION
             criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.0001)
@@ -188,14 +201,14 @@ class Calibrate:
             frame_markers = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
             size_of_marker =  0.0125 # side lenght of the marker in meters
-            rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , camera_matrix, distortion_coefficients0)
+            rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , self.camera_matrix, self.distortion_coefficients0)
 
             length_of_axis = 0.025
             imaxis = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
             if tvecs is not None:
                 for i in range(len(tvecs)):
-                    imaxis = aruco.drawAxis(imaxis, camera_matrix, distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
+                    imaxis = aruco.drawAxis(imaxis, self.camera_matrix, self.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
 
             cv2.imshow("frame", imaxis)
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -205,18 +218,20 @@ class Calibrate:
 # =================================
 # Run Calibration
 
-# Calibrate based on images
-cal = Calibrate("calibration_images")
+if __name__ == "__main__":
+    
+    # Calibrate based on images
+    cal = Calibrate(path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250)
 
-#cal.take_pictures(False)
+    #cal.take_pictures(False)
 
-ret, camera_matrix, distortion_coefficients0, rotation_vectors, translation_vectors = cal.calibrate_camera()
+    cal.calibrate_camera()
 
-#undist = cal.get_undistorted_image(f"{cal.CALIBRATION_IMAGE_PATH}/capture_4.png")
-#cal.show_images(undist)
+    #undist = cal.get_undistorted_image(f"{cal.CALIBRATION_IMAGE_PATH}/capture_4.png")
+    #cal.show_images(undist)
 
-#cal.show_pose_for_image("capture_1.png")
+    #cal.show_pose_for_image("capture_1.png")
 
-cal.show_pose()
+    cal.show_pose()
 
 
