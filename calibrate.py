@@ -198,8 +198,6 @@ class Calibrate:
             for corner in corners:
                 cv2.cornerSubPix(gray, corner, winSize = (3,3), zeroZone = (-1,-1), criteria = criteria)
 
-            frame_markers = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
-
             size_of_marker =  0.0125 # side lenght of the marker in meters
             rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , self.camera_matrix, self.distortion_coefficients0)
 
@@ -208,10 +206,11 @@ class Calibrate:
 
             if tvecs is not None:
                 for i in range(len(tvecs)):
-                    imaxis = aruco.drawAxis(imaxis, self.camera_matrix, self.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
+                    imaxis = aruco.drawAxis(frame, self.camera_matrix, self.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
 
             cv2.imshow("frame", imaxis)
             if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.release_camera(cap)
                 break
         
 
