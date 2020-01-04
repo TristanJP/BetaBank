@@ -18,12 +18,13 @@ class Object_3d:
 
         self.cal = Calibrate(path, search_aruco_dict)
 
-    def draw(self, frame, corners, ids):
-        imgpts = np.int32(imgpts).reshape(-1,2)
-
-        img = cv2.drawContours(img, [imgpts[:4]],-1, (0,255,0), -3)
+    def draw(self, img, corners, imgpts):
+        corner = tuple(corners[0].ravel())
+        img = cv2.line(img, (corner[0], corner[1]), (corner[2], corner[3]), (255,125,65), 5)
+        img = cv2.line(img, (corner[0], corner[1]), (corner[4], corner[5]), (255,125,65), 5)
+        img = cv2.line(img, (corner[0], corner[1]), (corner[6], corner[7]), (255,125,65), 5)
+        #img = cv2.line(img, corner, tuple(imgpts[2].ravel()), (0,0,255), 5)
         return img
-
 
     def draw_object_3d(self):
         cap = self.cal.capture_camera()
@@ -45,18 +46,21 @@ class Object_3d:
             length_of_axis = 0.025
             imaxis = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
-            axis = np.float32([[3,0,0], [0,3,0], [0,0,3]]).reshape(-1,3)
+            #axis = np.float32([[0,0,0], [0,3,0], [3,3,0], [3,0,0], [0,0,-3], [0,3,-3], [3,3,-3], [3,0,-3]])
+            #axis = np.float32([[3,0,0], [0,3,0], [0,0,-3]]).reshape(-1,3)
+
             #imgpts, jac = cv2.projectPoints(axis, rvecs, tvecs, self.cal.camera_matrix, self.cal.distortion_coefficients0)
-            #imaxis = self.draw(frame.copy(), corners, ids)
 
             if tvecs is not None:
                 for i in range(len(tvecs)):
-                    imaxis = aruco.drawAxis(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
+                    imaxis = self.draw(imaxis, corners[i], ids[i])
+
+                    #imaxis = aruco.drawAxis(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
 
 
             cv2.imshow("frame", imaxis)
             if cv2.waitKey(1) & 0xFF == ord('q'):
-                cal.release_camera(cap)
+                self.cal.release_camera(cap)
                 break
 
 if __name__ == "__main__":
