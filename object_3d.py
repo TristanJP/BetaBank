@@ -30,9 +30,15 @@ class Object_3d:
 
     def draw_lines(self, img, corners, imgpts):
         corner = tuple(corners[0].ravel())
-        img = cv2.line(img, (corner[0], corner[1]), (corner[2], corner[3]), (255,125,65), 5)
-        img = cv2.line(img, (corner[0], corner[1]), (corner[4], corner[5]), (255,125,65), 5)
-        img = cv2.line(img, (corner[0], corner[1]), (corner[6], corner[7]), (255,125,65), 5)
+        img = cv2.line(img, (corner[0], corner[1]), (corner[2], corner[3]), (65,125,255), 5)
+        img = cv2.line(img, (corner[0], corner[1]), (corner[4], corner[5]), (65,125,255), 5)
+        img = cv2.line(img, (corner[0], corner[1]), (corner[6], corner[7]), (65,125,255), 5)
+        return img
+
+    def draw_point(self, img, corners, imgpnts):
+        corner = tuple(corners[0].ravel())
+        img = cv2.line(img, (0, 0), (0, 0), (125,255,65), 5)
+        img = cv2.line(img, (corner[0], corner[1]), (corner[0], corner[1]), (125,255,65), 5)
         return img
 
     def draw_object_3d(self):
@@ -62,10 +68,10 @@ class Object_3d:
 
             if tvecs is not None:
                 for i in range(len(tvecs)):
+                    imaxis = self.draw_point(imaxis, corners[i], ids)
                     #imaxis = self.draw_lines(imaxis, corners[i], ids)
-                    imaxis = self.draw_plane(imaxis, corners[i], ids)
+                    #imaxis = self.draw_plane(imaxis, corners[i], ids)
                     #imaxis = aruco.drawAxis(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
-
 
             cv2.imshow("frame", imaxis)
             if cv2.waitKey(1) & 0xFF == ord('q'):
