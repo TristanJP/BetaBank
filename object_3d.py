@@ -18,12 +18,21 @@ class Object_3d:
 
         self.cal = Calibrate(path, search_aruco_dict)
 
-    def draw(self, img, corners, imgpts):
+    def draw_plane(self, img, corners, imgpts):
         corner = tuple(corners[0].ravel())
         img = cv2.line(img, (corner[0], corner[1]), (corner[2], corner[3]), (255,125,65), 5)
         img = cv2.line(img, (corner[0], corner[1]), (corner[4], corner[5]), (255,125,65), 5)
         img = cv2.line(img, (corner[0], corner[1]), (corner[6], corner[7]), (255,125,65), 5)
-        #img = cv2.line(img, corner, tuple(imgpts[2].ravel()), (0,0,255), 5)
+        img = cv2.line(img, (corner[6], corner[7]), (corner[2], corner[3]), (255,125,65), 5)
+        img = cv2.line(img, (corner[6], corner[7]), (corner[4], corner[5]), (255,125,65), 5)
+        img = cv2.line(img, (corner[2], corner[3]), (corner[4], corner[5]), (255,125,65), 5)
+        return img
+
+    def draw_lines(self, img, corners, imgpts):
+        corner = tuple(corners[0].ravel())
+        img = cv2.line(img, (corner[0], corner[1]), (corner[2], corner[3]), (255,125,65), 5)
+        img = cv2.line(img, (corner[0], corner[1]), (corner[4], corner[5]), (255,125,65), 5)
+        img = cv2.line(img, (corner[0], corner[1]), (corner[6], corner[7]), (255,125,65), 5)
         return img
 
     def draw_object_3d(self):
@@ -53,8 +62,8 @@ class Object_3d:
 
             if tvecs is not None:
                 for i in range(len(tvecs)):
-                    imaxis = self.draw(imaxis, corners[i], ids[i])
-
+                    #imaxis = self.draw_lines(imaxis, corners[i], ids)
+                    imaxis = self.draw_plane(imaxis, corners[i], ids)
                     #imaxis = aruco.drawAxis(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
 
 
