@@ -139,7 +139,7 @@ class Calibrate:
         self.distortion_coefficients0 = distortion_coefficients0
         self.rotation_vectors = rotation_vectors
         self.translation_vectors = translation_vectors
-        return ret, camera_matrix, distortion_coefficients0, rotation_vectors, translation_vectors
+        return {"ret": ret, "cam_mtx": camera_matrix, "dist_coef": distortion_coefficients0, "rvecs": rotation_vectors, "tvec": translation_vectors}
 
     # show images
     def show_images(self, images: list):
@@ -198,7 +198,7 @@ class Calibrate:
             for corner in corners:
                 cv2.cornerSubPix(gray, corner, winSize = (3,3), zeroZone = (-1,-1), criteria = criteria)
 
-            size_of_marker =  0.0125 # side lenght of the marker in meters
+            size_of_marker =  0.0125 # side length of the marker in meters
             rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , self.camera_matrix, self.distortion_coefficients0)
 
             length_of_axis = 0.025
