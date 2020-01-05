@@ -17,8 +17,11 @@ if __name__ == "__main__":
     main.camera.start()
 
     while True:
-        cv2.imshow(main.camera.get_current_frame())
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        
+        cv2.imshow("frame", main.camera.get_current_frame())
     
     #main.detection.get_markers_in_frame(main.camera.get_current_frame(), cv2.aruco.DICT_6X6_250)
 
-    #main.camera.release_camera()
+    main.camera.release_camera()

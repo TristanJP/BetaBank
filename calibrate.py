@@ -226,11 +226,11 @@ if __name__ == "__main__":
 
     cal.calibrate_camera()
 
-    #undist = cal.get_undistorted_image(f"{cal.CALIBRATION_IMAGE_PATH}/capture_4.png")
-    #cal.show_images(undist)
+    undist = cal.get_undistorted_image(f"{cal.CALIBRATION_IMAGE_PATH}/capture_7.png")
+    cal.show_images(undist)
 
     #cal.show_pose_for_image("capture_1.png")
 
-    cal.show_pose()
+    #cal.show_pose()
 
 
