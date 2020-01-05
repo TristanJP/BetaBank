@@ -74,10 +74,23 @@ class Object_3d:
         for edge in edges:
             for vertex in edge:
                 glVertex3fv(vertices[vertex])
-        glEnd()
+        #glEnd()
     
     def draw_cube(self, img, corners, imgptns):
-        Cube()
+        self.Cube()
+
+    def _draw_cube(self, img, imgpts):
+        imgpts = np.int32(imgpts).reshape(-1,2)
+  
+        # draw floor
+        cv2.drawContours(img, [imgpts[:4]],-1,(200,150,10),-3)
+  
+        # draw pillars
+        for i,j in zip(range(4),range(4,8)):
+            cv2.line(img, tuple(imgpts[i]), tuple(imgpts[j]),(255),3)
+  
+        # draw roof
+        cv2.drawContours(img, [imgpts[4:]],-1,(200,150,10),3)
 
     def draw_object_3d(self):
         cap = self.cal.capture_camera()
@@ -99,17 +112,24 @@ class Object_3d:
             length_of_axis = 0.025
             imaxis = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
-            #axis = np.float32([[0,0,0], [0,3,0], [3,3,0], [3,0,0], [0,0,-3], [0,3,-3], [3,3,-3], [3,0,-3]])
-            #axis = np.float32([[3,0,0], [0,3,0], [0,0,-3]]).reshape(-1,3)
-
-            #imgpts, jac = cv2.projectPoints(axis, rvecs, tvecs, self.cal.camera_matrix, self.cal.distortion_coefficients0)
+            # set up criteria, object points and axis            
+            objp = np.zeros((6*7,3), np.float32)
+            objp[:,:2] = np.mgrid[0:7,0:6].T.reshape(-1,2)
+    
+            axis = np.float32([[0,0,0], [0,3,0], [3,3,0], [3,0,0],
+                            [0,0,-3],[0,3,-3],[3,3,-3],[3,0,-3] ])
 
             if tvecs is not None:
                 for i in range(len(tvecs)):
+                     # project 3D points to image plane
+                    cv2.cornerSubPix(gray,corners[i],(11,11),(-1,-1),criteria)
+                    rvecs, tvecs, _ = cv2.solvePnPRansac(objp, corners, self.cal.camera_matrix, self.cal.distortion_coefficients0)
+                    imgpts, _ = cv2.projectPoints(axis, rvecs, tvecs, self.cal.camera_matrix,  self.cal.distortion_coefficients0)
+  
                     #imaxis = self.draw_point(imaxis, corners[i], ids)
                     #imaxis = self.draw_lines(imaxis, corners[i], ids)
                     #imaxis = self.draw_plane(imaxis, corners[i], ids)
-                    imaxis = self.draw_cube(imaxis, corners[i], ids)
+                    imaxis = self._draw_cube(imaxis, corners[i])
                     #imaxis = aruco.drawAxis(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
 
             cv2.imshow("frame", imaxis)
