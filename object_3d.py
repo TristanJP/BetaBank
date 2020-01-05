@@ -5,6 +5,9 @@ import numpy as np
 from glob import glob
 from matplotlib import pyplot as plt
 from calibrate import Calibrate
+import OpenGL
+from OpenGL.GL import *
+from OpenGL.GLU import *
 
 class Object_3d:
 
@@ -41,6 +44,41 @@ class Object_3d:
         img = cv2.line(img, (corner[0], corner[1]), (corner[0], corner[1]), (125,255,65), 5)
         return img
 
+    def Cube(self):
+        vertices= (
+            (1, -1, -1),
+            (1, 1, -1),
+            (-1, 1, -1),
+            (-1, -1, -1),
+            (1, -1, 1),
+            (1, 1, 1),
+            (-1, -1, 1),
+            (-1, 1, 1)
+            )
+        edges = (
+            (0,1),
+            (0,3),
+            (0,4),
+            (2,1),
+            (2,3),
+            (2,7),
+            (6,3),
+            (6,4),
+            (6,7),
+            (5,1),
+            (5,4),
+            (5,7)
+            )
+        
+        glBegin(GL_LINES)
+        for edge in edges:
+            for vertex in edge:
+                glVertex3fv(vertices[vertex])
+        glEnd()
+    
+    def draw_cube(self, img, corners, imgptns):
+        Cube()
+
     def draw_object_3d(self):
         cap = self.cal.capture_camera()
 
@@ -68,9 +106,10 @@ class Object_3d:
 
             if tvecs is not None:
                 for i in range(len(tvecs)):
-                    imaxis = self.draw_point(imaxis, corners[i], ids)
+                    #imaxis = self.draw_point(imaxis, corners[i], ids)
                     #imaxis = self.draw_lines(imaxis, corners[i], ids)
                     #imaxis = self.draw_plane(imaxis, corners[i], ids)
+                    imaxis = self.draw_cube(imaxis, corners[i], ids)
                     #imaxis = aruco.drawAxis(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
 
             cv2.imshow("frame", imaxis)
