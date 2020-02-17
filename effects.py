@@ -7,12 +7,9 @@ class Effects(object):
   
   
         # set up criteria, object points and axis
-          
-        objp = np.zeros((6*7,3), np.float32)
-        objp[:,:2] = np.mgrid[0:7,0:6].T.reshape(-1,2)
   
-        axis = np.float32([[0,0,0], [0,3,0], [3,3,0], [3,0,0],
-                           [0,0,-3],[0,3,-3],[3,3,-3],[3,0,-3] ])
+        axis = np.float32([[0,0,0], [0,0.01,0], [0.01,0.01,0], [0.01,0,0],
+                           [0,0,-0.01],[0,0.01,-0.01],[0.01,0.01,-0.01],[0.01,0,-0.01] ])
   
         # find grid corners in image
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -30,12 +27,16 @@ class Effects(object):
     def _draw_cube(self, img, imgpts):
         imgpts = np.int32(imgpts).reshape(-1,2)
   
-        # draw floor
-        cv2.drawContours(img, [imgpts[:4]],-1,(0.02,0.015,0.001),-3)
-  
+        # draw roof
+        cv2.drawContours(img, [imgpts[4:]],-1,(0,0,200),-3)
+
         # draw pillars
         for i,j in zip(range(4),range(4,8)):
             cv2.line(img, tuple(imgpts[i]), tuple(imgpts[j]),(255),3)
+
+        # draw floor
+        cv2.drawContours(img, [imgpts[:4]],-1,(0,200,0),3)
   
-        # draw roof
-        cv2.drawContours(img, [imgpts[4:]],-1,(0.02,0.015,0.001),3)
+        
+  
+        
