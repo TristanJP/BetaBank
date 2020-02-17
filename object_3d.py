@@ -159,8 +159,8 @@ class Object_3d:
             imaxis = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
             if tvecs is not None:
-                effects.render(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, ret, corners, rvecs[0], tvecs[0], objPoints)
-                #for i in range(len(tvecs)):
+                for i in range(len(tvecs)):
+                    effects.render(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, ret, corners, rvecs[i], tvecs[i], objPoints)
                     #imaxis = self.draw_plane(imaxis, corners[i], ids)
 
 
