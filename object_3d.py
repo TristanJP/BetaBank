@@ -8,6 +8,7 @@ from calibrate import Calibrate
 import OpenGL
 from OpenGL.GL import *
 from OpenGL.GLU import *
+from effects import Effects
 
 class Object_3d:
 
@@ -137,9 +138,41 @@ class Object_3d:
                 self.cal.release_camera(cap)
                 break
 
+    def draw_cube_new(self):
+        cap = self.cal.capture_camera()
+        effects = Effects()
+
+        while True:
+            ret, frame = cap.read()
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            parameters =  aruco.DetectorParameters_create()
+            corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.search_aruco_dict,
+                                                                parameters=parameters)
+            # SUB PIXEL DETECTION
+            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.0001)
+            for corner in corners:
+                cv2.cornerSubPix(gray, corner, winSize = (3,3), zeroZone = (-1,-1), criteria = criteria)
+
+            size_of_marker =  0.0125 # side lenght of the marker in meters
+            rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , self.cal.camera_matrix, self.cal.distortion_coefficients0)
+
+            imaxis = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
+
+            if tvecs is not None:
+                effects.render(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, ret, corners, rvecs[0], tvecs[0], objPoints)
+                #for i in range(len(tvecs)):
+                    #imaxis = self.draw_plane(imaxis, corners[i], ids)
+
+
+            cv2.imshow("frame", imaxis)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.cal.release_camera(cap)
+                break
+
 if __name__ == "__main__":
     object_3d = Object_3d(path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250)
     #ret, camera_matrix, distortion_coefficients0, rotation_vectors, translation_vectors = 
     object_3d.cal.calibrate_camera()
 
-    object_3d.draw_object_3d()
+    #object_3d.draw_object_3d()
+    object_3d.draw_cube_new()
