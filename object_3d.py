@@ -113,24 +113,10 @@ class Object_3d:
             length_of_axis = 0.025
             imaxis = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
-            # set up criteria, object points and axis            
-            #objp = np.zeros((6*7,3), np.float32)
-            #objp[:,:2] = np.mgrid[0:7,0:6].T.reshape(-1,2)
-    
-            #axis = np.float32([[0,0,0], [0,3,0], [3,3,0], [3,0,0],
-                            #[0,0,-3],[0,3,-3],[3,3,-3],[3,0,-3] ])
-
             if tvecs is not None:
                 for i in range(len(tvecs)):
-                    # project 3D points to image plane
-                    #cv2.cornerSubPix(gray,corners[i],(11,11),(-1,-1),criteria)
-                    #rvecs, tvecs, _ = cv2.solvePnPRansac(objp, corners, self.cal.camera_matrix, self.cal.distortion_coefficients0)
-                    #imgpts, _ = cv2.projectPoints(axis, rvecs, tvecs, self.cal.camera_matrix,  self.cal.distortion_coefficients0)
-  
-                    #imaxis = self.draw_point(imaxis, corners[i], ids)
-                    #imaxis = self.draw_lines(imaxis, corners[i], ids)
                     imaxis = self.draw_plane(imaxis, corners[i], ids)
-                    #imaxis = self._draw_cube(imaxis, corners[i])
+
                     imaxis = aruco.drawAxis(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
 
             cv2.imshow("frame", imaxis)
