@@ -21,7 +21,6 @@ class Object_3d:
         self.CALIBRATION_IMAGE_PATH = path
         self.search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
 
-        self.cal = Calibrate(path, search_aruco_dict)
 
     def draw_plane(self, img, corners, imgpts):
         corner = tuple(corners[0].ravel())
@@ -143,15 +142,14 @@ class Object_3d:
                 cv2.cornerSubPix(gray, corner, winSize = (3,3), zeroZone = (-1,-1), criteria = criteria)
 
             size_of_marker =  0.0125 # side lenght of the marker in meters
-            rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , self.cal.camera_matrix, self.cal.distortion_coefficients0)
+            rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , cam.calibration_data["cam_mtx"], cam.calibration_data["dist_coef"])
 
             imaxis = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
 
             if tvecs is not None:
                 for i in range(len(tvecs)):
-                    effects.render(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, ret, corners, rvecs[i], tvecs[i], objPoints)
+                    effects.render(imaxis, cam.calibration_data["cam_mtx"], cam.calibration_data["dist_coef"], ret, corners, rvecs[i], tvecs[i], objPoints)
                     #imaxis = self.draw_plane(imaxis, corners[i], ids)
-
 
             cv2.imshow("frame", imaxis)
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -161,7 +159,6 @@ class Object_3d:
 if __name__ == "__main__":
     object_3d = Object_3d(path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250)
     #ret, camera_matrix, distortion_coefficients0, rotation_vectors, translation_vectors = 
-    object_3d.cal.calibrate_camera()
 
     #object_3d.draw_object_3d()
     object_3d.draw_cube_new()
