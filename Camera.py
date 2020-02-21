@@ -30,8 +30,20 @@ class Camera:
         cv2.destroyAllWindows()
 
     def calibrate(self, path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250):
-        self.cal = Calibrate(path, search_aruco_dict)
-        self.calibration_data = self.cal.calibrate_camera()
+        cal = Calibrate(path, search_aruco_dict)
+        self.calibration_data = cal.calibrate_camera()
 
     def get_calibration_data(self):
         return self.calibration_data
+
+if __name__ == "__main__":
+    cam = Camera()
+    cam.start()
+
+    while (True):
+        frame = cam.current_frame
+        cv2.imshow("frame", frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            cam.release_camera()
+            break
