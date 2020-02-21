@@ -9,14 +9,18 @@ class Camera:
         self.video_capture.set(3, 1280)
         self.video_capture.set(4, 720)
         self.calibrate()
-        self.current_frame = self.video_capture.read()[1]
+        read = self.video_capture.read()
+        self.current_frame = read[1]
+        self.successful_read = read[0]
 
     def start(self):
-        Thread(target=self._update_frame, args=()).start()
+        Thread(target=self._update_frame, args=(), daemon = True).start()
 
     def _update_frame(self):
         while(True):
-            self.current_frame = self.video_capture.read()[1]
+            read = self.video_capture.read()
+            self.current_frame = read[1]
+            self.successful_read = read[0]
 
     def get_current_frame(self):
         return self.current_frame
@@ -25,8 +29,8 @@ class Camera:
         self.video_capture.release()
         cv2.destroyAllWindows()
 
-    def calibrate(self):
-        self.cal = Calibrate("calibration_images", cv2.aruco.DICT_6X6_250)
+    def calibrate(self, path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250):
+        self.cal = Calibrate(path, search_aruco_dict)
         self.calibration_data = self.cal.calibrate_camera()
 
     def get_calibration_data(self):

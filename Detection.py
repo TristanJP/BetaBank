@@ -1,6 +1,6 @@
 import cv2
 from cv2 import aruco
-from Camera import Camera
+from camera import Camera
 
 class Detection():
 

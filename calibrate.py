@@ -17,7 +17,7 @@ class Calibrate:
     rotation_vectors: None
     translation_vectors: None
 
-    def __init__(self, path, search_aruco_dict):
+    def __init__(self, path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250):
         self.CALIBRATION_IMAGE_PATH = path
         self.search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
 
@@ -139,7 +139,7 @@ class Calibrate:
         self.distortion_coefficients0 = distortion_coefficients0
         self.rotation_vectors = rotation_vectors
         self.translation_vectors = translation_vectors
-        return {"ret": ret, "cam_mtx": camera_matrix, "dist_coef": distortion_coefficients0, "rvecs": rotation_vectors, "tvec": translation_vectors}
+        return {"ret": ret, "cam_mtx": camera_matrix, "dist_coef": distortion_coefficients0, "rvecs": rotation_vectors, "tvecs": translation_vectors}
 
     # show images
     def show_images(self, images: list):

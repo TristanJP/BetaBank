@@ -5,6 +5,7 @@ import numpy as np
 from glob import glob
 from matplotlib import pyplot as plt
 from calibrate import Calibrate
+from camera import Camera
 import OpenGL
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -125,11 +126,13 @@ class Object_3d:
                 break
 
     def draw_cube_new(self):
-        cap = self.cal.capture_camera()
+        cam = Camera()
+        cam.start()
         effects = Effects()
 
         while True:
-            ret, frame = cap.read()
+            frame = cam.current_frame
+            ret = cam.successful_read
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             parameters =  aruco.DetectorParameters_create()
             corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.search_aruco_dict,
@@ -152,7 +155,7 @@ class Object_3d:
 
             cv2.imshow("frame", imaxis)
             if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.cal.release_camera(cap)
+                cam.release_camera()
                 break
 
 if __name__ == "__main__":
