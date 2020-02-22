@@ -4,6 +4,8 @@ from calibrate import Calibrate
 
 class Camera:
 
+    calibration_data: dict
+
     def __init__(self):
         self.video_capture = cv2.VideoCapture(0)
         self.video_capture.set(3, 1280)
@@ -29,8 +31,8 @@ class Camera:
         self.video_capture.release()
         cv2.destroyAllWindows()
 
-    def calibrate(self, path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250):
-        cal = Calibrate(path, search_aruco_dict)
+    def calibrate(self, path="calibration_images"):
+        cal = Calibrate(path)
         self.calibration_data = cal.calibrate_camera()
 
     def get_calibration_data(self):

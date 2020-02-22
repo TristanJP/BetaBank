@@ -4,6 +4,8 @@ from camera import Camera
 
 class Detection():
 
+    calibration_data: dict
+
     def __init__(self, calibration_data):
         self.calibration_data = calibration_data
 
