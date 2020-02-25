@@ -28,4 +28,4 @@ class Detection():
                                                                   self.calibration_data["cam_mtx"],
                                                                   self.calibration_data["dist_coef"])
 
-        return rvecs, tvecs, objPoints
+        return corners, rvecs, tvecs, objPoints
