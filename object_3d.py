@@ -94,10 +94,12 @@ class Object_3d:
         cv2.drawContours(img, [imgpts[4:]],-1,(200,150,10),3)
 
     def draw_object_3d(self):
-        cap = self.cal.capture_camera()
+        cam = Camera()
+        cam.start()
 
         while True:
-            ret, frame = cap.read()
+            frame = cam.current_frame
+            ret = cam.successful_read
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             parameters =  aruco.DetectorParameters_create()
             corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.search_aruco_dict,
@@ -108,7 +110,7 @@ class Object_3d:
                 cv2.cornerSubPix(gray, corner, winSize = (3,3), zeroZone = (-1,-1), criteria = criteria)
 
             size_of_marker =  0.0125 # side lenght of the marker in meters
-            rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , self.cal.camera_matrix, self.cal.distortion_coefficients0)
+            rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, size_of_marker , cam.calibration_data["cam_mtx"], cam.calibration_data["dist_coef"])
 
             length_of_axis = 0.025
             imaxis = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
@@ -116,12 +118,13 @@ class Object_3d:
             if tvecs is not None:
                 for i in range(len(tvecs)):
                     imaxis = self.draw_plane(imaxis, corners[i], ids)
+                    
 
-                    imaxis = aruco.drawAxis(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
+                    #imaxis = aruco.drawAxis(imaxis, self.cal.camera_matrix, self.cal.distortion_coefficients0, rvecs[i], tvecs[i], length_of_axis)
 
             cv2.imshow("frame", imaxis)
             if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.cal.release_camera(cap)
+                cam.release_camera()
                 break
 
     def draw_cube_new(self):
