@@ -22,21 +22,22 @@ class Frame_Analyser:
     def anaylse_frame(self, frame_path, search_aruco_dict=cv2.aruco.DICT_6X6_250):
         frame = cv2.imread(frame_path)
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
-        rvecs, tvecs, objPoints = self.detection.get_markers_in_frame(frame, aruco_dict)
+        corners, rvecs, tvecs, objPoints = self.detection.get_markers_in_frame(frame, aruco_dict)
+        frame_data = {"corners": corners, "rvecs": rvecs, "tvecs": tvecs, "objPoints": objPoints}
 
-        return rvecs, tvecs, objPoints
+        return frame_data
 
-    def average_translation(self, tvecs):
+    def average_position(self, corners):
         print()
 
 if __name__ == "__main__":
 
     frame_analyser = Frame_Analyser()
-    rvecs, tvecs, objPoints = frame_analyser.anaylse_frame("test_images/capture_10.png", cv2.aruco.DICT_6X6_250)
+    frame_data = frame_analyser.anaylse_frame("test_images/capture_10.png", cv2.aruco.DICT_6X6_250)
 
-    print(tvecs)
+    print(frame_data["corners"])
 
-    average_tvec = frame_analyser.average_translation(tvecs)
+    average_tvec = frame_analyser.average_position(frame_data["corners"])
 
     #detection.get_markers_in_frame()
     #ret, camera_matrix, distortion_coefficients0, rotation_vectors, translation_vectors = 
