@@ -21,7 +21,7 @@ class Frame_Analyser:
 
     def anaylse_frame(self, frame_path, search_aruco_dict=cv2.aruco.DICT_6X6_250):
         frame = cv2.imread(frame_path)
-        rvecs, tvecs, objPoints = self.detection.get_markers_in_frame(frame, search_aruco_dict)
+        rvecs, tvecs, objPoints = self.detection.get_markers_in_frame(frame, cv2.aruco.getPredefinedDictionary(search_aruco_dict))
 
         return rvecs, tvecs, objPoints
 
