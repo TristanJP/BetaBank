@@ -28,16 +28,42 @@ class Frame_Analyser:
         return frame_data
 
     def average_position(self, corners):
-        print()
+        total_x = 0
+        total_y = 0
+
+        for corner in corners:
+            corner = tuple(corners[0].ravel())
+            total_x += corner[0]
+            total_y += corner[1]
+
+        average_x = total_x/len(corners)
+        average_y = total_y/len(corners)
+
+        #print(f"{average_x}, {average_y}")
+        return (int(average_x), int(average_y))
+
+    def show_position(self, position):
+        # cam = Camera()
+        # cam.start()
+
+        frame = cv2.imread("test_images/capture_10.png")
+        print(f"{position[0]}, {position[1]}")
+        frame_new = cv2.line(frame, (position[0], position[1]), (position[0], position[1]), (65,65,255), 10)
+
+        while True:
+
+            cv2.imshow("frame", frame_new)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break  
 
 if __name__ == "__main__":
 
     frame_analyser = Frame_Analyser()
     frame_data = frame_analyser.anaylse_frame("test_images/capture_10.png", cv2.aruco.DICT_6X6_250)
 
-    print(frame_data["corners"])
+    average_position = frame_analyser.average_position(frame_data["corners"])
 
-    average_tvec = frame_analyser.average_position(frame_data["corners"])
+    frame_analyser.show_position(average_position)
 
     #detection.get_markers_in_frame()
     #ret, camera_matrix, distortion_coefficients0, rotation_vectors, translation_vectors = 
