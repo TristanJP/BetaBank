@@ -18,7 +18,7 @@ class Effects(object):
         if ret == True:
               
             # project 3D points to image plane
-            #rvecs, tvecs, _ = cv2.solvePnPRansac(objp, corners, mtx, dist)
+            
             imgpts, _ = cv2.projectPoints(axis, rvecs, tvecs, mtx, dist)
   
             # draw cube
