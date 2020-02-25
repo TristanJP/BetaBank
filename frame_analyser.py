@@ -32,9 +32,9 @@ class Frame_Analyser:
         total_y = 0
 
         for corner in corners:
-            corner = tuple(corners[0].ravel())
-            total_x += corner[0]
-            total_y += corner[1]
+            corner = tuple(corner.ravel())
+            total_x += (corner[0] + corner[2]) / 2
+            total_y += (corner[1] + corner[5]) / 2
 
         average_x = total_x/len(corners)
         average_y = total_y/len(corners)
@@ -42,16 +42,12 @@ class Frame_Analyser:
         #print(f"{average_x}, {average_y}")
         return (int(average_x), int(average_y))
 
-    def show_position(self, position):
-        # cam = Camera()
-        # cam.start()
-
-        frame = cv2.imread("test_images/capture_10.png")
+    def show_position(self, frame_path, position):
+        frame = cv2.imread(frame_path)
         print(f"{position[0]}, {position[1]}")
-        frame_new = cv2.line(frame, (position[0], position[1]), (position[0], position[1]), (65,65,255), 10)
+        frame_new = cv2.line(frame, (position[0], position[1]), (position[0], position[1]), (65,65,255), 6)
 
         while True:
-
             cv2.imshow("frame", frame_new)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break  
@@ -59,11 +55,12 @@ class Frame_Analyser:
 if __name__ == "__main__":
 
     frame_analyser = Frame_Analyser()
-    frame_data = frame_analyser.anaylse_frame("test_images/capture_10.png", cv2.aruco.DICT_6X6_250)
+    frame_path = "test_images/capture_10.png"
+    
+    frame_data = frame_analyser.anaylse_frame(frame_path, cv2.aruco.DICT_6X6_250)
 
     average_position = frame_analyser.average_position(frame_data["corners"])
-
-    frame_analyser.show_position(average_position)
+    frame_analyser.show_position(frame_path, average_position)
 
     #detection.get_markers_in_frame()
     #ret, camera_matrix, distortion_coefficients0, rotation_vectors, translation_vectors = 
