@@ -16,7 +16,7 @@ class Detection():
 
         # Find markers
         corners, ids, rejectedImgPoints = aruco.detectMarkers(gray_frame, search_aruco_dict, parameters=parameters)
-        
+
         # SUB PIXEL DETECTION
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.0001)
         for corner in corners:
@@ -38,10 +38,9 @@ class Detection():
             frame_data_body["rvecs"] = rvecs[i]
             frame_data_body["tvecs"] = tvecs[i]
 
-            frame_data[i+1] = frame_data_body.copy()
+            frame_data[ids[i][0]] = frame_data_body.copy()
 
             i += 1
 
         frame_data["objPoints"] = objPoints
-
         return frame_data
