@@ -26,9 +26,11 @@ class Frame_Analyser:
         
         return frame_data
 
-    def center_of_mass(self, frame_data_by_id):
+    def center_of_mass(self, frame_data):
         total_x = 0
         total_y = 0
+
+        frame_data_by_id = frame_data["ids"]
 
         for marker_id in frame_data_by_id:
             marker_corner = frame_data_by_id[marker_id]["corners"]
@@ -74,7 +76,7 @@ if __name__ == "__main__":
 
     frame_data = frame_analyser.anaylse_frame(frame_path, cv2.aruco.DICT_6X6_250)
 
-    average_position = frame_analyser.center_of_mass(frame_data["ids"])
+    average_position = frame_analyser.center_of_mass(frame_data)
 
     frame_analyser.show_position(frame_path, average_position, None, None)
 
