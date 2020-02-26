@@ -54,11 +54,13 @@ class Frame_Analyser:
 
         return relative_vectors
 
-    def show_position(self, frame_path, position):
+    def show_position(self, frame_path, position, corners, ids):
         frame = cv2.imread(frame_path)
         position = [int(pos) for pos in position]
         print(f"{position[0]}, {position[1]}")
         frame_new = cv2.line(frame, (position[0], position[1]), (position[0], position[1]), (65,65,255), 6)
+        if corners is not None:
+            frame_new = aruco.drawDetectedMarkers(frame_new, corners, ids)
 
         while True:
             cv2.imshow("frame", frame_new)
@@ -74,11 +76,9 @@ if __name__ == "__main__":
 
     average_position = frame_analyser.center_of_mass(frame_data["ids"])
 
-    frame_analyser.show_position(frame_path, average_position)
+    frame_analyser.show_position(frame_path, average_position, None, None)
 
     relative_dict = frame_analyser.get_markers_position_relative_to_center(frame_data, average_position)
-
-    #print(relative_dict)
 
     exit()
 
