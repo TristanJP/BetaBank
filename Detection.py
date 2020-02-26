@@ -1,6 +1,7 @@
 import cv2
 from cv2 import aruco
 from camera import Camera
+import copy
 
 class Detection():
 
@@ -15,7 +16,7 @@ class Detection():
 
         # Find markers
         corners, ids, rejectedImgPoints = aruco.detectMarkers(gray_frame, search_aruco_dict, parameters=parameters)
-
+        
         # SUB PIXEL DETECTION
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.0001)
         for corner in corners:
@@ -28,4 +29,19 @@ class Detection():
                                                                   self.calibration_data["cam_mtx"],
                                                                   self.calibration_data["dist_coef"])
 
-        return corners, rvecs, tvecs, objPoints
+        i = 0
+        frame_data = {}
+        frame_data_body = {}
+        while i < len(ids):
+            marker_corner = tuple(corners[i].ravel())
+            frame_data_body["corners"] = marker_corner
+            frame_data_body["rvecs"] = rvecs[i]
+            frame_data_body["tvecs"] = tvecs[i]
+
+            frame_data[i+1] = frame_data_body.copy()
+
+            i += 1
+
+        frame_data["objPoints"] = objPoints
+
+        return frame_data
