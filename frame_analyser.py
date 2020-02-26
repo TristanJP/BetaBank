@@ -22,28 +22,41 @@ class Frame_Analyser:
     def anaylse_frame(self, frame_path, search_aruco_dict=cv2.aruco.DICT_6X6_250):
         frame = cv2.imread(frame_path)
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
-        corners, rvecs, tvecs, objPoints = self.detection.get_markers_in_frame(frame, aruco_dict)
-        frame_data = {"corners": corners, "rvecs": rvecs, "tvecs": tvecs, "objPoints": objPoints}
-
+        frame_data = self.detection.get_markers_in_frame(frame, aruco_dict)
+        
         return frame_data
 
-    def average_position(self, corners):
+    def center_of_mass(self, frame_data_by_id):
         total_x = 0
         total_y = 0
 
-        for corner in corners:
-            corner = tuple(corner.ravel())
-            total_x += (corner[0] + corner[2]) / 2
-            total_y += (corner[1] + corner[5]) / 2
+        for marker_id in frame_data_by_id:
+            marker_corner = frame_data_by_id[marker_id]["corners"]
+            total_x += (marker_corner[0] + marker_corner[2]) / 2
+            total_y += (marker_corner[1] + marker_corner[5]) / 2
 
-        average_x = total_x/len(corners)
-        average_y = total_y/len(corners)
+        size =  len(frame_data_by_id)
+        average_x = total_x/size
+        average_y = total_y/size
 
-        #print(f"{average_x}, {average_y}")
-        return (int(average_x), int(average_y))
+        return (average_x, average_y)
+
+    def get_markers_position_relative_to_center(self, frame_data, center_of_mass):
+        relative_vectors = {}
+        ids = tuple(frame_data["ids"].ravel())
+        corners = frame_data["corners"]
+        i = 0
+        while i < len(ids):
+            corner = tuple(corners[i].ravel())
+            relative_vector = ((corner[0] - center_of_mass[0]), corner[1] - center_of_mass[1])
+            relative_vectors[ids[i]] = relative_vector
+            i+=1
+
+        return relative_vectors
 
     def show_position(self, frame_path, position):
         frame = cv2.imread(frame_path)
+        position = [int(pos) for pos in position]
         print(f"{position[0]}, {position[1]}")
         frame_new = cv2.line(frame, (position[0], position[1]), (position[0], position[1]), (65,65,255), 6)
 
@@ -56,11 +69,35 @@ if __name__ == "__main__":
 
     frame_analyser = Frame_Analyser()
     frame_path = "test_images/capture_10.png"
-    
+
     frame_data = frame_analyser.anaylse_frame(frame_path, cv2.aruco.DICT_6X6_250)
 
-    average_position = frame_analyser.average_position(frame_data["corners"])
+    average_position = frame_analyser.center_of_mass(frame_data["ids"])
+
     frame_analyser.show_position(frame_path, average_position)
+
+    relative_dict = frame_analyser.get_markers_position_relative_to_center(frame_data, average_position)
+
+    #print(relative_dict)
+
+    exit()
+
+    ids = frame_data["ids"]
+    idc = tuple(ids.ravel())[0]
+    corners = frame_data["corners"]
+    corner = corners[0]
+    corner = tuple(corner.ravel())
+
+    relative_corner_x = relative_dict[idc][0]
+    relative_corner_y = relative_dict[idc][1]
+
+    #print(f"{relative_corner_x}, {relative_corner_y}")
+    #print(f"{corner[0]}, {corner[1]}")
+
+    relative_position = (relative_corner_x + corner[0], relative_corner_y + corner[1])
+    test_pos = (corner[0], corner[1])
+
+    frame_analyser.show_position(frame_path, test_pos, corners, ids)
 
     #detection.get_markers_in_frame()
     #ret, camera_matrix, distortion_coefficients0, rotation_vectors, translation_vectors = 
