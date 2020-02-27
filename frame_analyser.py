@@ -45,14 +45,12 @@ class Frame_Analyser:
 
     def get_markers_position_relative_to_center(self, frame_data, center_of_mass):
         relative_vectors = {}
-        ids = tuple(frame_data["ids"].ravel())
-        corners = frame_data["corners"]
-        i = 0
-        while i < len(ids):
-            corner = tuple(corners[i].ravel())
-            relative_vector = ((corner[0] - center_of_mass[0]), corner[1] - center_of_mass[1])
-            relative_vectors[ids[i]] = relative_vector
-            i+=1
+        frame_data_by_id = frame_data["ids"]
+
+        for marker_id in frame_data_by_id:
+            marker_corner = frame_data_by_id[marker_id]["corners"]
+            relative_vector = ((marker_corner[0] - center_of_mass[0]), marker_corner[1] - center_of_mass[1])
+            relative_vectors[marker_id] = relative_vector
 
         return relative_vectors
 
