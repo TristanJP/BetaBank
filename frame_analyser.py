@@ -113,13 +113,14 @@ if __name__ == "__main__":
     frame_path = "test_images/capture_10.png"
 
     frame_data = frame_analyser.anaylse_frame(frame_path, cv2.aruco.DICT_6X6_250)
+    
+    composedRvec, composedTvec = frame_analyser.relativePosition(frame_data["ids"][1]["marker_rvecs"], frame_data["ids"][1]["marker_tvecs"], frame_data["ids"][2]["marker_rvecs"][0], frame_data["ids"][2]["marker_tvecs"][0])
 
     image = cv2.imread(frame_path)
-    #frame_analyser.render(image, frame_analyser.calibration_data["cam_mtx"], frame_analyser.calibration_data["dist_coef"], frame_data["ids"][2]["marker_rvecs"], frame_data["ids"][2]["marker_tvecs"])
 
-    stuff = frame_analyser.relativePosition(frame_data["ids"][1]["marker_rvecs"], frame_data["ids"][1]["marker_tvecs"], frame_data["ids"][2]["marker_rvecs"][0], frame_data["ids"][2]["marker_tvecs"][0])
+    stuff = cv2.composeRT(composedRvec, composedTvec, frame_data["ids"][2]["marker_rvecs"].T, frame_data["ids"][2]["marker_tvecs"].T)
+    frame_analyser.render(image, frame_analyser.calibration_data["cam_mtx"], frame_analyser.calibration_data["dist_coef"], stuff[0], stuff[1])
 
-    print(stuff)
 
     #average_position = frame_analyser.center_of_mass(frame_data)
 
