@@ -3,6 +3,8 @@ import cv2
 from cv2 import aruco
 from calibrate import Calibrate
 from camera import Camera
+import numpy as np
+from camera import Camera
 
 class Frame_Analyser:
 
@@ -65,7 +67,45 @@ class Frame_Analyser:
         while True:
             cv2.imshow("frame", frame_new)
             if cv2.waitKey(1) & 0xFF == ord('q'):
-                break  
+                break
+
+    def render(self, image, mtx, dist, marker_rvecs, marker_tvecs):
+        axis = np.float32([[0,0,0], [0.01,0,0], [0.01,0.01,0], [0,0.01,0],
+                           [0,0,0.01],[0.01,0,0.01],[0.01,0.01,0.01],[0,0.01,0.01] ]).reshape(-1,3)
+        imgpts, _ = cv2.projectPoints(axis, marker_rvecs, marker_tvecs, mtx, dist)
+
+        imgpts = np.int32(imgpts).reshape(-1,2)
+
+        image = cv2.line(image, (0,0), tuple(imgpts[0]), (125,255,65), 5)
+
+        while True:
+            cv2.imshow("frame", image)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+    def inversePerspective(self, rvec, tvec):
+        R, _ = cv2.Rodrigues(rvec)
+        R = np.matrix(R).T
+        invTvec = np.dot(-R, np.matrix(tvec))
+        invRvec, _ = cv2.Rodrigues(R)
+        return invRvec, invTvec
+
+    def relativePosition(self, rvec1, tvec1, rvec2, tvec2):
+        rvec1, tvec1 = rvec1.reshape((3, 1)), tvec1.reshape((3, 1))
+        rvec2, tvec2 = rvec2.reshape((3, 1)), tvec2.reshape((3, 1))
+
+        # Inverse the second marker, the right one in the image
+        invRvec, invTvec = self.inversePerspective(rvec2, tvec2)
+
+        print(rvec2, tvec2, "\n and \n", self.inversePerspective(invRvec, invTvec))
+
+        info = cv2.composeRT(rvec1, tvec1, invRvec, invTvec)
+        composedRvec, composedTvec = info[0], info[1]
+
+        composedRvec = composedRvec.reshape((3, 1))
+        composedTvec = composedTvec.reshape((3, 1))
+
+        return composedRvec, composedTvec
 
 if __name__ == "__main__":
 
@@ -74,11 +114,18 @@ if __name__ == "__main__":
 
     frame_data = frame_analyser.anaylse_frame(frame_path, cv2.aruco.DICT_6X6_250)
 
-    average_position = frame_analyser.center_of_mass(frame_data)
+    image = cv2.imread(frame_path)
+    #frame_analyser.render(image, frame_analyser.calibration_data["cam_mtx"], frame_analyser.calibration_data["dist_coef"], frame_data["ids"][2]["marker_rvecs"], frame_data["ids"][2]["marker_tvecs"])
 
-    frame_analyser.show_position(frame_path, average_position, None, None)
+    stuff = frame_analyser.relativePosition(frame_data["ids"][1]["marker_rvecs"], frame_data["ids"][1]["marker_tvecs"], frame_data["ids"][2]["marker_rvecs"][0], frame_data["ids"][2]["marker_tvecs"][0])
 
-    relative_dict = frame_analyser.get_markers_position_relative_to_center(frame_data, average_position)
+    print(stuff)
+
+    #average_position = frame_analyser.center_of_mass(frame_data)
+
+    #frame_analyser.show_position(frame_path, average_position, None, None)
+
+    #relative_dict = frame_analyser.get_markers_position_relative_to_center(frame_data, average_position)
 
     exit()
 
