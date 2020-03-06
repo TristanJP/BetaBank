@@ -6,6 +6,7 @@ from camera import Camera
 import numpy as np
 from camera import Camera
 from effects import Effects
+import copy
 
 class Frame_Analyser:
 
@@ -124,6 +125,20 @@ class Frame_Analyser:
 
         return composedRvec, composedTvec
 
+    def get_relative_dict(self, frame_data):
+        relative_frame_data = {}
+        relative_frame_body = {}
+        origin_rvec = frame_data["ids"][1]["marker_rvecs"]
+        origin_tvec = frame_data["ids"][1]["marker_tvecs"]
+
+        for marker_id in frame_data["ids"]:
+            relative_rvec, relative_tvec = self.relative_position(origin_rvec, origin_tvec, frame_data["ids"][marker_id]["marker_rvecs"], frame_data["ids"][marker_id]["marker_tvecs"])
+            
+            relative_frame_body["relative_rvec"] = relative_rvec
+            relative_frame_body["relative_tvec"] = relative_tvec
+            relative_frame_data[marker_id] = relative_frame_body.copy()
+
+        return relative_frame_data
 
 if __name__ == "__main__":
 
@@ -138,45 +153,17 @@ if __name__ == "__main__":
     # Get data about frame (tvecs, rvecs, corners)
     frame_data = frame_analyser.anaylse_frame(image, cv2.aruco.DICT_6X6_250)
     alt_frame_data = frame_analyser.anaylse_frame(alt_image, cv2.aruco.DICT_6X6_250)
-    
-    # Create (rvecs, tvecs) that are relative from one marker to another
-    composedRvec, composedTvec = frame_analyser.relative_position(frame_data["ids"][1]["marker_rvecs"], frame_data["ids"][1]["marker_tvecs"], frame_data["ids"][2]["marker_rvecs"], frame_data["ids"][2]["marker_tvecs"])
 
+    relative_frame_data = frame_analyser.get_relative_dict(frame_data)
+    
     # Get new position based on realtive marker (r/tvecs) and new frame
-    relative_data = cv2.composeRT(composedRvec, composedTvec, alt_frame_data["ids"][2]["marker_rvecs"].T, alt_frame_data["ids"][2]["marker_tvecs"].T)
+    relative_data = cv2.composeRT(relative_frame_data[2]["relative_rvec"], relative_frame_data[2]["relative_tvec"], alt_frame_data["ids"][2]["marker_rvecs"].T, alt_frame_data["ids"][2]["marker_tvecs"].T)
 
     # Draw the point
     frame_analyser.render(alt_image, frame_analyser.calibration_data["cam_mtx"], frame_analyser.calibration_data["dist_coef"], relative_data[0], relative_data[1])
-
 
     #average_position = frame_analyser.center_of_mass(frame_data)
 
     #frame_analyser.show_position(frame_path, average_position, None, None)
 
     #relative_dict = frame_analyser.get_markers_position_relative_to_center(frame_data, average_position)
-
-    exit()
-
-    ids = frame_data["ids"]
-    idc = tuple(ids.ravel())[0]
-    corners = frame_data["corners"]
-    corner = corners[0]
-    corner = tuple(corner.ravel())
-
-    relative_corner_x = relative_dict[idc][0]
-    relative_corner_y = relative_dict[idc][1]
-
-    #print(f"{relative_corner_x}, {relative_corner_y}")
-    #print(f"{corner[0]}, {corner[1]}")
-
-    relative_position = (relative_corner_x + corner[0], relative_corner_y + corner[1])
-    test_pos = (corner[0], corner[1])
-
-    frame_analyser.show_position(frame_path, test_pos, corners, ids)
-
-    #detection.get_markers_in_frame()
-    #ret, camera_matrix, distortion_coefficients0, rotation_vectors, translation_vectors = 
-    #detection.cal.calibrate_camera()
-
-    #object_3d.draw_object_3d()
-    #detection.draw_cube_new()
