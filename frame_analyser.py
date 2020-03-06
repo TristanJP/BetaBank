@@ -21,8 +21,7 @@ class Frame_Analyser:
     def analyse_video(self, video_path):
         print("test")
 
-    def anaylse_frame(self, frame_path, search_aruco_dict=cv2.aruco.DICT_6X6_250):
-        frame = cv2.imread(frame_path)
+    def anaylse_frame(self, frame, search_aruco_dict=cv2.aruco.DICT_6X6_250):
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
         frame_data = self.detection.get_markers_in_frame(frame, aruco_dict)
         
@@ -83,43 +82,55 @@ class Frame_Analyser:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-    def inversePerspective(self, rvec, tvec):
+    def inverse_perspective(self, rvec, tvec):
         R, _ = cv2.Rodrigues(rvec)
         R = np.matrix(R).T
         invTvec = np.dot(-R, np.matrix(tvec))
         invRvec, _ = cv2.Rodrigues(R)
         return invRvec, invTvec
 
-    def relativePosition(self, rvec1, tvec1, rvec2, tvec2):
+    def relative_position(self, rvec1, tvec1, rvec2, tvec2):
+        # Gets (r/tvecs) relative to each other
+
         rvec1, tvec1 = rvec1.reshape((3, 1)), tvec1.reshape((3, 1))
         rvec2, tvec2 = rvec2.reshape((3, 1)), tvec2.reshape((3, 1))
 
         # Inverse the second marker, the right one in the image
-        invRvec, invTvec = self.inversePerspective(rvec2, tvec2)
+        invRvec, invTvec = self.inverse_perspective(rvec2, tvec2)
 
-        print(rvec2, tvec2, "\n and \n", self.inversePerspective(invRvec, invTvec))
+        #print(rvec2, tvec2, "\n and \n", self.inverse_perspective(invRvec, invTvec))
 
-        info = cv2.composeRT(rvec1, tvec1, invRvec, invTvec)
-        composedRvec, composedTvec = info[0], info[1]
+        data = cv2.composeRT(rvec1, tvec1, invRvec, invTvec)
+        composedRvec, composedTvec = data[0], data[1]
 
         composedRvec = composedRvec.reshape((3, 1))
         composedTvec = composedTvec.reshape((3, 1))
 
         return composedRvec, composedTvec
 
+
 if __name__ == "__main__":
 
     frame_analyser = Frame_Analyser()
+
+    # Get frame images etc.
     frame_path = "test_images/capture_10.png"
-
-    frame_data = frame_analyser.anaylse_frame(frame_path, cv2.aruco.DICT_6X6_250)
-    
-    composedRvec, composedTvec = frame_analyser.relativePosition(frame_data["ids"][1]["marker_rvecs"], frame_data["ids"][1]["marker_tvecs"], frame_data["ids"][2]["marker_rvecs"][0], frame_data["ids"][2]["marker_tvecs"][0])
-
+    alt_frame_path = "test_images/capture_12.png"
     image = cv2.imread(frame_path)
+    alt_image = cv2.imread(alt_frame_path)
 
-    stuff = cv2.composeRT(composedRvec, composedTvec, frame_data["ids"][2]["marker_rvecs"].T, frame_data["ids"][2]["marker_tvecs"].T)
-    frame_analyser.render(image, frame_analyser.calibration_data["cam_mtx"], frame_analyser.calibration_data["dist_coef"], stuff[0], stuff[1])
+    # Get data about frame (tvecs, rvecs, corners)
+    frame_data = frame_analyser.anaylse_frame(image, cv2.aruco.DICT_6X6_250)
+    alt_frame_data = frame_analyser.anaylse_frame(alt_image, cv2.aruco.DICT_6X6_250)
+    
+    # Create (rvecs, tvecs) that are relative from one marker to another
+    composedRvec, composedTvec = frame_analyser.relative_position(frame_data["ids"][1]["marker_rvecs"], frame_data["ids"][1]["marker_tvecs"], frame_data["ids"][2]["marker_rvecs"], frame_data["ids"][2]["marker_tvecs"])
+
+    # Get new position based on realtive marker (r/tvecs) and new frame
+    relative_data = cv2.composeRT(composedRvec, composedTvec, alt_frame_data["ids"][2]["marker_rvecs"].T, alt_frame_data["ids"][2]["marker_tvecs"].T)
+
+    # Draw the point
+    frame_analyser.render(alt_image, frame_analyser.calibration_data["cam_mtx"], frame_analyser.calibration_data["dist_coef"], relative_data[0], relative_data[1])
 
 
     #average_position = frame_analyser.center_of_mass(frame_data)
