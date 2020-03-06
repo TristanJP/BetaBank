@@ -163,5 +163,5 @@ if __name__ == "__main__":
     object_3d = Object_3d(path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250)
     #ret, camera_matrix, distortion_coefficients0, rotation_vectors, translation_vectors = 
 
-    object_3d.draw_object_3d()
-   # object_3d.draw_cube_new()
+    #object_3d.draw_object_3d()
+    object_3d.draw_cube_new()
