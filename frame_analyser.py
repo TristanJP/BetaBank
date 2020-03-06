@@ -150,11 +150,20 @@ class Frame_Analyser:
 
         return combined_dict
 
-    def get_average_of_vector(self, vector_list):
-
     def get_average_of_vectors(self, combined_frame_data):
-        for marker_id in combined_frame_data["ids"]:
-            self.get_average_of_vector(combined_frame_data["ids"][marker_id]["combined_rvec"])
+        sum_rvec = 0.0
+        sum_tvec = 0.0
+        for marker_id in combined_frame_data:
+            rvec = combined_frame_data[marker_id]["combined_rvec"]
+            tvec = combined_frame_data[marker_id]["combined_tvec"]
+            sum_rvec += rvec
+            sum_tvec += tvec
+
+        size = len(combined_frame_data)
+        average_rvec = sum_rvec/size
+        average_tvec = sum_tvec/size
+
+        return average_rvec, average_tvec
 
 if __name__ == "__main__":
 
@@ -176,13 +185,16 @@ if __name__ == "__main__":
     # Combine the new frame data with the relative data
     combined_frame_data = frame_analyser.get_combined_dict(alt_frame_data, relative_frame_data)
 
-    #frame_analyser.get_average_of_vectors()
+    average_rvec, average_tvec = frame_analyser.get_average_of_vectors(combined_frame_data)
+
+    print(average_rvec)
+    print(average_tvec)
 
     # Get new position based on realtive marker (r/tvecs) and new frame
-    relative_data = cv2.composeRT(relative_frame_data[2]["relative_rvec"], relative_frame_data[2]["relative_tvec"], alt_frame_data["ids"][2]["marker_rvecs"].T, alt_frame_data["ids"][2]["marker_tvecs"].T)
+    #relative_data = cv2.composeRT(relative_frame_data[2]["relative_rvec"], relative_frame_data[2]["relative_tvec"], alt_frame_data["ids"][2]["marker_rvecs"].T, alt_frame_data["ids"][2]["marker_tvecs"].T)
 
     # Draw the point
-    frame_analyser.render(alt_image, frame_analyser.calibration_data["cam_mtx"], frame_analyser.calibration_data["dist_coef"], combined_frame_data[1]["combined_rvec"], combined_frame_data[2]["combined_tvec"])
+    frame_analyser.render(alt_image, frame_analyser.calibration_data["cam_mtx"], frame_analyser.calibration_data["dist_coef"], average_rvec, average_tvec)
 
     #average_position = frame_analyser.center_of_mass(frame_data)
 
