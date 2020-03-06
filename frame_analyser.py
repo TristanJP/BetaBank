@@ -150,8 +150,11 @@ class Frame_Analyser:
 
         return combined_dict
 
-    def get_average_of_vectors(self, vectors):
-        print("test")
+    def get_average_of_vector(self, vector_list):
+
+    def get_average_of_vectors(self, combined_frame_data):
+        for marker_id in combined_frame_data["ids"]:
+            self.get_average_of_vector(combined_frame_data["ids"][marker_id]["combined_rvec"])
 
 if __name__ == "__main__":
 

@@ -22,7 +22,14 @@ class Effects(object):
             imgpts, _ = cv2.projectPoints(axis, rvecs, tvecs, mtx, dist)
   
             # draw cube
-            self._draw_cube(image, imgpts)
+            self._draw_axis(image, imgpts)
+
+    def _draw_axis(self, img, imgpts):
+        imgpts = np.int32(imgpts).reshape(-1,2)
+
+        img = cv2.line(img, tuple(imgpts[0].ravel()), tuple(imgpts[3].ravel()), (255,0,0), 3)
+        img = cv2.line(img, tuple(imgpts[0].ravel()), tuple(imgpts[1].ravel()), (0,255,0), 3)
+        img = cv2.line(img, tuple(imgpts[0].ravel()), tuple(imgpts[4].ravel()), (0,0,255), 3)
   
     def _draw_cube(self, img, imgpts):
         imgpts = np.int32(imgpts).reshape(-1,2)
