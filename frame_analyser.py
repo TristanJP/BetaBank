@@ -5,6 +5,7 @@ from calibrate import Calibrate
 from camera import Camera
 import numpy as np
 from camera import Camera
+from effects import Effects
 
 class Frame_Analyser:
 
@@ -82,6 +83,21 @@ class Frame_Analyser:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
+    def render_realtime(self, mtx, dist, marker_rvecs, marker_tvecs):
+        cam = Camera()
+        cam.start()
+        effects = Effects()
+        mtx = frame_analyser.calibration_data["cam_mtx"]
+
+        while True:
+            frame = cam.current_frame
+            ret = cam.successful_read
+
+            rt_frame_data = self.anaylse_frame(frame)
+
+            composedRvec, composedTvec = frame_analyser.relative_position(frame_data["ids"][1]["marker_rvecs"], frame_data["ids"][1]["marker_tvecs"], frame_data["ids"][2]["marker_rvecs"], frame_data["ids"][2]["marker_tvecs"])
+
+
     def inverse_perspective(self, rvec, tvec):
         R, _ = cv2.Rodrigues(rvec)
         R = np.matrix(R).T
@@ -115,7 +131,7 @@ if __name__ == "__main__":
 
     # Get frame images etc.
     frame_path = "test_images/capture_10.png"
-    alt_frame_path = "test_images/capture_12.png"
+    alt_frame_path = "test_images/capture_14.png"
     image = cv2.imread(frame_path)
     alt_image = cv2.imread(alt_frame_path)
 
