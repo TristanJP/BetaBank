@@ -140,13 +140,26 @@ class Frame_Analyser:
 
         return relative_frame_data
 
+    def get_combined_dict(self, frame_data, relative_data):
+        combined_dict = {}
+        combined_body = {}
+        for marker_id in frame_data["ids"]:
+            combined_data = cv2.composeRT(relative_data[marker_id]["relative_rvec"], relative_data[marker_id]["relative_tvec"], frame_data["ids"][marker_id]["marker_rvecs"].T, frame_data["ids"][marker_id]["marker_tvecs"].T)
+            combined_body["combined_rvec"], combined_body["combined_tvec"] = combined_data[0], combined_data[1]
+            combined_dict[marker_id] = combined_body.copy()
+
+        return combined_dict
+
+    def get_average_of_vectors(self, vectors):
+        print("test")
+
 if __name__ == "__main__":
 
     frame_analyser = Frame_Analyser()
 
     # Get frame images etc.
     frame_path = "test_images/capture_10.png"
-    alt_frame_path = "test_images/capture_14.png"
+    alt_frame_path = "test_images/capture_12.png"
     image = cv2.imread(frame_path)
     alt_image = cv2.imread(alt_frame_path)
 
@@ -154,13 +167,19 @@ if __name__ == "__main__":
     frame_data = frame_analyser.anaylse_frame(image, cv2.aruco.DICT_6X6_250)
     alt_frame_data = frame_analyser.anaylse_frame(alt_image, cv2.aruco.DICT_6X6_250)
 
+    # Get relative t/rvecs for markers to 1st marker
     relative_frame_data = frame_analyser.get_relative_dict(frame_data)
-    
+
+    # Combine the new frame data with the relative data
+    combined_frame_data = frame_analyser.get_combined_dict(alt_frame_data, relative_frame_data)
+
+    #frame_analyser.get_average_of_vectors()
+
     # Get new position based on realtive marker (r/tvecs) and new frame
     relative_data = cv2.composeRT(relative_frame_data[2]["relative_rvec"], relative_frame_data[2]["relative_tvec"], alt_frame_data["ids"][2]["marker_rvecs"].T, alt_frame_data["ids"][2]["marker_tvecs"].T)
 
     # Draw the point
-    frame_analyser.render(alt_image, frame_analyser.calibration_data["cam_mtx"], frame_analyser.calibration_data["dist_coef"], relative_data[0], relative_data[1])
+    frame_analyser.render(alt_image, frame_analyser.calibration_data["cam_mtx"], frame_analyser.calibration_data["dist_coef"], combined_frame_data[1]["combined_rvec"], combined_frame_data[2]["combined_tvec"])
 
     #average_position = frame_analyser.center_of_mass(frame_data)
 
