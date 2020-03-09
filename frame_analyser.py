@@ -71,13 +71,8 @@ class Frame_Analyser:
                 break
 
     def render(self, image, mtx, dist, marker_rvecs, marker_tvecs):
-        axis = np.float32([[0,0,0], [0.01,0,0], [0.01,0.01,0], [0,0.01,0],
-                           [0,0,0.01],[0.01,0,0.01],[0.01,0.01,0.01],[0,0.01,0.01] ]).reshape(-1,3)
-        imgpts, _ = cv2.projectPoints(axis, marker_rvecs, marker_tvecs, mtx, dist)
-
-        imgpts = np.int32(imgpts).reshape(-1,2)
-
-        image = cv2.line(image, (0,0), tuple(imgpts[0]), (125,255,65), 5)
+        effects = Effects()
+        effects.render(image, mtx, dist, True, marker_rvecs, marker_tvecs, "axis")
 
         while True:
             cv2.imshow("frame", image)
@@ -165,39 +160,38 @@ class Frame_Analyser:
 
         return average_rvec, average_tvec
 
+    def test_single_frame(self):
+        # Get frame images etc.
+        frame_path = "test_images/capture_10.png"
+        alt_frame_path = "test_images/capture_14.png"
+        image = cv2.imread(frame_path)
+        alt_image = cv2.imread(alt_frame_path)
+
+        # Get data about frame (tvecs, rvecs, corners)
+        frame_data = self.anaylse_frame(image, cv2.aruco.DICT_6X6_250)
+        alt_frame_data = self.anaylse_frame(alt_image, cv2.aruco.DICT_6X6_250)
+
+        # Get relative t/rvecs for markers to 1st marker
+        relative_frame_data = self.get_relative_dict(frame_data)
+
+        # Combine the new frame data with the relative data
+        combined_frame_data = self.get_combined_dict(alt_frame_data, relative_frame_data)
+
+        average_rvec, average_tvec = self.get_average_of_vectors(combined_frame_data)
+
+        # Get new position based on realtive marker (r/tvecs) and new frame
+        #relative_data = cv2.composeRT(relative_frame_data[2]["relative_rvec"], relative_frame_data[2]["relative_tvec"], alt_frame_data["ids"][2]["marker_rvecs"].T, alt_frame_data["ids"][2]["marker_tvecs"].T)
+
+        # Draw the point
+        self.render(alt_image, self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], average_rvec, average_tvec)
+
+        #average_position = frame_analyser.center_of_mass(frame_data)
+        #frame_analyser.show_position(frame_path, average_position, None, None)
+        #relative_dict = frame_analyser.get_markers_position_relative_to_center(frame_data, average_position)
+
 if __name__ == "__main__":
 
     frame_analyser = Frame_Analyser()
 
-    # Get frame images etc.
-    frame_path = "test_images/capture_10.png"
-    alt_frame_path = "test_images/capture_12.png"
-    image = cv2.imread(frame_path)
-    alt_image = cv2.imread(alt_frame_path)
-
-    # Get data about frame (tvecs, rvecs, corners)
-    frame_data = frame_analyser.anaylse_frame(image, cv2.aruco.DICT_6X6_250)
-    alt_frame_data = frame_analyser.anaylse_frame(alt_image, cv2.aruco.DICT_6X6_250)
-
-    # Get relative t/rvecs for markers to 1st marker
-    relative_frame_data = frame_analyser.get_relative_dict(frame_data)
-
-    # Combine the new frame data with the relative data
-    combined_frame_data = frame_analyser.get_combined_dict(alt_frame_data, relative_frame_data)
-
-    average_rvec, average_tvec = frame_analyser.get_average_of_vectors(combined_frame_data)
-
-    print(average_rvec)
-    print(average_tvec)
-
-    # Get new position based on realtive marker (r/tvecs) and new frame
-    #relative_data = cv2.composeRT(relative_frame_data[2]["relative_rvec"], relative_frame_data[2]["relative_tvec"], alt_frame_data["ids"][2]["marker_rvecs"].T, alt_frame_data["ids"][2]["marker_tvecs"].T)
-
-    # Draw the point
-    frame_analyser.render(alt_image, frame_analyser.calibration_data["cam_mtx"], frame_analyser.calibration_data["dist_coef"], average_rvec, average_tvec)
-
-    #average_position = frame_analyser.center_of_mass(frame_data)
-
-    #frame_analyser.show_position(frame_path, average_position, None, None)
-
-    #relative_dict = frame_analyser.get_markers_position_relative_to_center(frame_data, average_position)
+    frame_analyser.test_single_frame()
+    

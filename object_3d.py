@@ -151,7 +151,7 @@ class Object_3d:
 
             if tvecs is not None:
                 for i in range(len(tvecs)):
-                    effects.render(imaxis, cam.calibration_data["cam_mtx"], cam.calibration_data["dist_coef"], ret, corners, rvecs[i], tvecs[i], objPoints)
+                    effects.render(imaxis, cam.calibration_data["cam_mtx"], cam.calibration_data["dist_coef"], ret, rvecs[i], tvecs[i], "cube")
                     #imaxis = self.draw_plane(imaxis, corners[i], ids)
 
             cv2.imshow("frame", imaxis)

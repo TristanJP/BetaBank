@@ -3,26 +3,20 @@ import numpy as np
 
 class Effects(object):
     
-    def render(self, image, mtx, dist, ret, corners, rvecs, tvecs, objPoints):
-  
-  
-        # set up criteria, object points and axis
-  
+    def render(self, image, mtx, dist, ret, rvecs, tvecs, shape):
+        # set up axis
         axis = np.float32([[0,0,0], [0.01,0,0], [0.01,0.01,0], [0,0.01,0],
                            [0,0,0.01],[0.01,0,0.01],[0.01,0.01,0.01],[0,0.01,0.01] ]).reshape(-1,3)
-  
-        # find grid corners in image
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-  
         if ret == True:
-              
             # project 3D points to image plane
-            
             imgpts, _ = cv2.projectPoints(axis, rvecs, tvecs, mtx, dist)
   
             # draw cube
-            self._draw_axis(image, imgpts)
+            if shape == "cube":
+                self._draw_cube(image, imgpts)
+            else:
+                self._draw_axis(image, imgpts)
 
     def _draw_axis(self, img, imgpts):
         imgpts = np.int32(imgpts).reshape(-1,2)
@@ -43,6 +37,15 @@ class Effects(object):
 
         # draw roof
         cv2.drawContours(img, [imgpts[4:]],-1,(0,200,0),3)
+
+    def test_render(self, marker_rvecs, marker_tvecs, mtx, dist):
+        axis = np.float32([[0,0,0], [0.01,0,0], [0.01,0.01,0], [0,0.01,0],
+                [0,0,0.01],[0.01,0,0.01],[0.01,0.01,0.01],[0,0.01,0.01] ]).reshape(-1,3)
+        imgpts, _ = cv2.projectPoints(axis, marker_rvecs, marker_tvecs, mtx, dist)
+
+        imgpts = np.int32(imgpts).reshape(-1,2)
+
+        image = cv2.line(image, (0,0), tuple(imgpts[0]), (125,255,65), 5)
 
         
   
