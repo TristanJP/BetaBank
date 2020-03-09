@@ -29,7 +29,7 @@ class Frame_Analyser:
         
         return frame_data
 
-    def center_of_mass(self, frame_data):
+    def center_of_mass_corners(self, frame_data):
         total_x = 0
         total_y = 0
 
@@ -46,7 +46,7 @@ class Frame_Analyser:
 
         return (average_x, average_y)
 
-    def get_markers_position_relative_to_center(self, frame_data, center_of_mass):
+    def get_corners_relative_to_center(self, frame_data, center_of_mass):
         relative_vectors = {}
         frame_data_by_id = frame_data["ids"]
 
@@ -79,11 +79,10 @@ class Frame_Analyser:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-    def render_realtime(self, mtx, dist, marker_rvecs, marker_tvecs):
+    def render_realtime(self, mtx, dist, marker_id):
         cam = Camera()
         cam.start()
         effects = Effects()
-        mtx = frame_analyser.calibration_data["cam_mtx"]
 
         while True:
             frame = cam.current_frame
@@ -91,8 +90,12 @@ class Frame_Analyser:
 
             rt_frame_data = self.anaylse_frame(frame)
 
-            composedRvec, composedTvec = frame_analyser.relative_position(frame_data["ids"][1]["marker_rvecs"], frame_data["ids"][1]["marker_tvecs"], frame_data["ids"][2]["marker_rvecs"], frame_data["ids"][2]["marker_tvecs"])
+            if marker_id in rt_frame_data["ids"]:
+                effects.render(frame, mtx, dist, ret, rt_frame_data["ids"][marker_id]["marker_rvecs"], rt_frame_data["ids"][marker_id]["marker_tvecs"], "axis")
 
+            cv2.imshow("frame", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
     def inverse_perspective(self, rvec, tvec):
         R, _ = cv2.Rodrigues(rvec)
@@ -189,9 +192,23 @@ class Frame_Analyser:
         #frame_analyser.show_position(frame_path, average_position, None, None)
         #relative_dict = frame_analyser.get_markers_position_relative_to_center(frame_data, average_position)
 
+    def test_realtime(self):
+        frame_path = "test_images/capture_10.png"
+        image = cv2.imread(frame_path)
+        frame_data = self.anaylse_frame(image, cv2.aruco.DICT_6X6_250)
+        relative_frame_data = self.get_relative_dict(frame_data)
+
+        self.render_realtime(self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], 1)
+
+
 if __name__ == "__main__":
 
     frame_analyser = Frame_Analyser()
 
-    frame_analyser.test_single_frame()
+    #frame_analyser.test_single_frame()
+
+    frame_analyser.test_realtime()
+
+    #composedRvec, composedTvec = frame_analyser.relative_position(rt_frame_data["ids"][1]["marker_rvecs"], rt_frame_data["ids"][1]["marker_tvecs"], rt_frame_data["ids"][2]["marker_rvecs"], rt_frame_data["ids"][2]["marker_tvecs"])
+
     
