@@ -181,7 +181,7 @@ class Frame_Analyser:
                 sum_tvec += tvec
 
             size = len(combined_frame_data)
-            average_rvec = sum_rvec/size
+            average_rvec = combined_frame_data[next(iter(combined_frame_data))]["combined_rvec"]
             average_tvec = sum_tvec/size
 
             return average_rvec, average_tvec
