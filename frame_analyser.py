@@ -112,8 +112,8 @@ class Frame_Analyser:
 
             average_rvec, average_tvec = self.get_average_of_vectors(combined_frame_data)
 
-            if marker_id in rt_frame_data["ids"]:
-                effects.render(frame, mtx, dist, ret, average_rvec, average_tvec, "axis")
+            if average_tvec is not None:
+                effects.render(frame, mtx, dist, ret, average_rvec, average_tvec, "cube")
 
             cv2.imshow("frame", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
