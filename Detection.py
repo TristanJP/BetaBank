@@ -33,15 +33,16 @@ class Detection():
         frame_data = {}
         frame_data_body = {}
         frame_data_ids = {}
-        while i < len(ids):
-            marker_corner = tuple(corners[i].ravel())
-            frame_data_body["corners"] = marker_corner
-            frame_data_body["marker_rvecs"] = rvecs[i]
-            frame_data_body["marker_tvecs"] = tvecs[i]
+        if ids is not None:
+            while i < len(ids):
+                marker_corner = tuple(corners[i].ravel())
+                frame_data_body["corners"] = marker_corner
+                frame_data_body["marker_rvecs"] = rvecs[i]
+                frame_data_body["marker_tvecs"] = tvecs[i]
 
-            frame_data_ids[ids[i][0]] = frame_data_body.copy()
+                frame_data_ids[ids[i][0]] = frame_data_body.copy()
 
-            i += 1
+                i += 1
 
         frame_data["ids"] = frame_data_ids
         frame_data["objPoints"] = objPoints
