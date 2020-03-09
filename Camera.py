@@ -6,11 +6,16 @@ class Camera:
 
     calibration_data: dict
 
-    def __init__(self):
+    def __init__(self, calibration_data):
         self.video_capture = cv2.VideoCapture(0)
         self.video_capture.set(3, 1280)
         self.video_capture.set(4, 720)
-        self.calibrate()
+
+        if calibration_data is not None:
+            self.calibration_data = calibration_data
+        else:
+            self.calibrate()
+            
         read = self.video_capture.read()
         self.current_frame = read[1]
         self.successful_read = read[0]
