@@ -34,35 +34,6 @@ class Calibrate:
         cap.release()
         cv2.destroyAllWindows()
 
-    def take_pictures(self, grayscale):
-        cap = self.capture_camera()
-        i = 0
-
-        while True:
-            # Capture frame-by-frame
-            ret, frame = cap.read()
-            if grayscale:
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            else:
-                gray = frame
-
-            # get corners
-            corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, self.calibrate_aruco_dict)
-            frame_markers = aruco.drawDetectedMarkers(gray.copy(), corners, ids)
-
-            cv2.imshow('frame',frame_markers)
-
-
-            if cv2.waitKey(1) & 0xFF == ord(' '):
-                
-                cv2.imwrite(f"{self.CALIBRATION_IMAGE_PATH}/capture_{i}.png", gray)
-                i += 1
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
-        self.release_camera(cap)
-
     def get_calibration_images(self):
         fnames = glob(f"{self.CALIBRATION_IMAGE_PATH}/*.png")
         #fnames = [f for f in glob("calibration_images/*.png")]
@@ -214,7 +185,6 @@ if __name__ == "__main__":
     # Calibrate based on images
     cal = Calibrate(path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250)
 
-    #cal.take_pictures(False)
 
     cal.calibrate_camera()
 
