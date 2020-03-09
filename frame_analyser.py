@@ -79,8 +79,8 @@ class Frame_Analyser:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-    def render_realtime(self, mtx, dist, marker_id):
-        cam = Camera()
+    def render_realtime_by_marker_id(self, mtx, dist, marker_id):
+        cam = Camera(self.calibration_data)
         cam.start()
         effects = Effects()
 
@@ -92,6 +92,28 @@ class Frame_Analyser:
 
             if marker_id in rt_frame_data["ids"]:
                 effects.render(frame, mtx, dist, ret, rt_frame_data["ids"][marker_id]["marker_rvecs"], rt_frame_data["ids"][marker_id]["marker_tvecs"], "axis")
+
+            cv2.imshow("frame", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+    def render_realtime_relative(self, mtx, dist, marker_id, relative_frame_data):
+        cam = Camera(self.calibration_data)
+        cam.start()
+        effects = Effects()
+
+        while True:
+            frame = cam.current_frame
+            ret = cam.successful_read
+
+            rt_frame_data = self.anaylse_frame(frame)
+
+            combined_frame_data = self.get_combined_dict(rt_frame_data, relative_frame_data)
+
+            average_rvec, average_tvec = self.get_average_of_vectors(combined_frame_data)
+
+            if marker_id in rt_frame_data["ids"]:
+                effects.render(frame, mtx, dist, ret, average_rvec, average_tvec, "axis")
 
             cv2.imshow("frame", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -123,11 +145,11 @@ class Frame_Analyser:
 
         return composedRvec, composedTvec
 
-    def get_relative_dict(self, frame_data):
+    def get_relative_dict(self, frame_data, origin_marker_id):
         relative_frame_data = {}
         relative_frame_body = {}
-        origin_rvec = frame_data["ids"][1]["marker_rvecs"]
-        origin_tvec = frame_data["ids"][1]["marker_tvecs"]
+        origin_rvec = frame_data["ids"][origin_marker_id]["marker_rvecs"]
+        origin_tvec = frame_data["ids"][origin_marker_id]["marker_tvecs"]
 
         for marker_id in frame_data["ids"]:
             relative_rvec, relative_tvec = self.relative_position(origin_rvec, origin_tvec, frame_data["ids"][marker_id]["marker_rvecs"], frame_data["ids"][marker_id]["marker_tvecs"])
@@ -149,19 +171,22 @@ class Frame_Analyser:
         return combined_dict
 
     def get_average_of_vectors(self, combined_frame_data):
-        sum_rvec = 0.0
-        sum_tvec = 0.0
-        for marker_id in combined_frame_data:
-            rvec = combined_frame_data[marker_id]["combined_rvec"]
-            tvec = combined_frame_data[marker_id]["combined_tvec"]
-            sum_rvec += rvec
-            sum_tvec += tvec
+        if len(combined_frame_data) >= 1:
+            sum_rvec = 0.0
+            sum_tvec = 0.0
+            for marker_id in combined_frame_data:
+                rvec = combined_frame_data[marker_id]["combined_rvec"]
+                tvec = combined_frame_data[marker_id]["combined_tvec"]
+                sum_rvec += rvec
+                sum_tvec += tvec
 
-        size = len(combined_frame_data)
-        average_rvec = sum_rvec/size
-        average_tvec = sum_tvec/size
+            size = len(combined_frame_data)
+            average_rvec = sum_rvec/size
+            average_tvec = sum_tvec/size
 
-        return average_rvec, average_tvec
+            return average_rvec, average_tvec
+
+        return None, None
 
     def test_single_frame(self):
         # Get frame images etc.
@@ -175,7 +200,7 @@ class Frame_Analyser:
         alt_frame_data = self.anaylse_frame(alt_image, cv2.aruco.DICT_6X6_250)
 
         # Get relative t/rvecs for markers to 1st marker
-        relative_frame_data = self.get_relative_dict(frame_data)
+        relative_frame_data = self.get_relative_dict(frame_data, 1)
 
         # Combine the new frame data with the relative data
         combined_frame_data = self.get_combined_dict(alt_frame_data, relative_frame_data)
@@ -196,13 +221,15 @@ class Frame_Analyser:
         frame_path = "test_images/capture_10.png"
         image = cv2.imread(frame_path)
         frame_data = self.anaylse_frame(image, cv2.aruco.DICT_6X6_250)
-        relative_frame_data = self.get_relative_dict(frame_data)
 
-        self.render_realtime(self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], 1)
+        chosen_marker = 1
+        relative_frame_data = self.get_relative_dict(frame_data, chosen_marker)
+
+        self.render_realtime_relative(self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], chosen_marker, relative_frame_data)
 
 
 if __name__ == "__main__":
-
+    
     frame_analyser = Frame_Analyser()
 
     #frame_analyser.test_single_frame()
