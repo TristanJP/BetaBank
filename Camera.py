@@ -6,7 +6,7 @@ class Camera:
 
     calibration_data: dict
 
-    def __init__(self, calibration_data):
+    def __init__(self, calibration_data = None):
         self.video_capture = cv2.VideoCapture(0)
         self.video_capture.set(3, 1280)
         self.video_capture.set(4, 720)
