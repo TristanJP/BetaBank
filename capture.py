@@ -73,4 +73,4 @@ if __name__ == "__main__":
 
     #cap.take_pictures(False, "test_images")
 
-    cap.take_video(False, "test_videos", "test.avi")
+    cap.take_video(False, "test_videos", "test60.avi")
