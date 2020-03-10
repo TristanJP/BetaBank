@@ -38,7 +38,7 @@ class Capture:
     
     def take_video(self, grayscale, video_folder, filename, search_aruco_dict=cv2.aruco.DICT_6X6_250):
 
-        out = cv2.VideoWriter(f"{video_folder}/{filename}",cv2.VideoWriter_fourcc('M','J','P','G'), 10, (1280, 720))
+        out = cv2.VideoWriter(f"{video_folder}/{filename}",cv2.VideoWriter_fourcc('M','J','P','G'), int(self.cam.video_capture.get(5)), (int(self.cam.video_capture.get(3)), int(self.cam.video_capture.get(4))))
 
         search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
         i = 0
@@ -57,9 +57,9 @@ class Capture:
             frame_markers = aruco.drawDetectedMarkers(gray.copy(), corners, ids)
 
             # Save frame
-            out.write(frame_markers)
+            out.write(gray)
 
-            cv2.imshow('frame', gray)
+            cv2.imshow('frame', frame_markers)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.cam.release_camera()
