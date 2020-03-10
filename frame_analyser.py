@@ -265,7 +265,7 @@ class Frame_Analyser:
         #relative_dict = frame_analyser.get_markers_position_relative_to_center(frame_data, average_position)
 
     def test_on_video(self):
-        name = "test_videos/test40.avi"
+        name = "test_videos/test60.avi"
         frame_data = self.analyse_video(name)
 
         chosen_marker = 1
@@ -277,7 +277,7 @@ class Frame_Analyser:
             frame_path = "test_images/capture_10.png"
             image = cv2.imread(frame_path)
             frame_data = self.anaylse_frame(image, cv2.aruco.DICT_6X6_250)
-        elif True:
+        elif False:
             name = "test_videos/test40"
             frame_data = self.analyse_video(f"{name}.avi")
             np.save(f"{name}.npy", frame_data)
@@ -297,8 +297,8 @@ if __name__ == "__main__":
     frame_analyser = Frame_Analyser()
 
     #frame_analyser.test_single_frame()
-    #frame_analyser.test_realtime()
-    frame_analyser.test_on_video()
+    frame_analyser.test_realtime()
+    #frame_analyser.test_on_video()
 
     #composedRvec, composedTvec = frame_analyser.relative_position(rt_frame_data["ids"][1]["marker_rvecs"], rt_frame_data["ids"][1]["marker_tvecs"], rt_frame_data["ids"][2]["marker_rvecs"], rt_frame_data["ids"][2]["marker_tvecs"])
 
