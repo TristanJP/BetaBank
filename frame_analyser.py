@@ -24,13 +24,25 @@ class Frame_Analyser:
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
 
         cap = cv2.VideoCapture(video_path)
-        print(cap.get(5))
-        delay = int((1/cap.get(5))*1000)
+        delay = int((1/cap.get(5))*(1000/2))
+        largest_frame_data = {"ids": {}}
         while(cap.isOpened()):
             ret, frame = cap.read()
-            cv2.imshow('frame',frame)
-            if cv2.waitKey(delay) & 0xFF == ord('q'):
+            if not ret:
                 break
+
+            frame_data = self.detection.get_markers_in_frame(frame, aruco_dict)
+            num_markers = len(frame_data["ids"])
+
+            if num_markers > len(largest_frame_data["ids"]):
+                largest_frame_data = frame_data.copy()
+
+            cv2.imshow('frame',frame)
+            if (cv2.waitKey(delay) & 0xFF == ord('q')) or (num_markers == 12):
+                cap.release()
+                break
+        
+        return largest_frame_data
 
     def anaylse_frame(self, frame, search_aruco_dict=cv2.aruco.DICT_6X6_250):
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
@@ -104,6 +116,7 @@ class Frame_Analyser:
 
             cv2.imshow("frame", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
+                cam.release_camera()
                 break
 
     def render_realtime_relative(self, mtx, dist, marker_id, relative_frame_data):
@@ -126,6 +139,7 @@ class Frame_Analyser:
 
             cv2.imshow("frame", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
+                cam.release_camera()
                 break
 
     def inverse_perspective(self, rvec, tvec):
@@ -234,6 +248,7 @@ class Frame_Analyser:
         chosen_marker = 1
         relative_frame_data = self.get_relative_dict(frame_data, chosen_marker)
 
+        #self.render_realtime_by_marker_id(self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], chosen_marker)
         self.render_realtime_relative(self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], chosen_marker, relative_frame_data)
 
 
@@ -244,7 +259,7 @@ if __name__ == "__main__":
     #frame_analyser.test_single_frame()
     #frame_analyser.test_realtime()
 
-    frame_analyser.analyse_video("test_videos/test60.avi")
+    frame_analyser.analyse_video("test_videos/test40.avi")
 
     #composedRvec, composedTvec = frame_analyser.relative_position(rt_frame_data["ids"][1]["marker_rvecs"], rt_frame_data["ids"][1]["marker_tvecs"], rt_frame_data["ids"][2]["marker_rvecs"], rt_frame_data["ids"][2]["marker_tvecs"])
 
