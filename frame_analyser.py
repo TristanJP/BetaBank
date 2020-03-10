@@ -20,7 +20,7 @@ class Frame_Analyser:
         cal = Calibrate(path)
         self.calibration_data = cal.calibrate_camera()
 
-    def analyse_video(self, video_path, search_aruco_dict=cv2.aruco.DICT_6X6_250):
+    def analyse_video(self, video_path, search_aruco_dict=cv2.aruco.DICT_6X6_250, show=False):
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
 
         cap = cv2.VideoCapture(video_path)
@@ -37,7 +37,9 @@ class Frame_Analyser:
             if num_markers > len(largest_frame_data["ids"]):
                 largest_frame_data = frame_data.copy()
 
-            cv2.imshow('frame',frame)
+            if show:
+                cv2.imshow('frame',frame)
+            
             if (cv2.waitKey(delay) & 0xFF == ord('q')) or (num_markers == 12):
                 cap.release()
                 break
@@ -241,9 +243,18 @@ class Frame_Analyser:
         #relative_dict = frame_analyser.get_markers_position_relative_to_center(frame_data, average_position)
 
     def test_realtime(self):
-        frame_path = "test_images/capture_10.png"
-        image = cv2.imread(frame_path)
-        frame_data = self.anaylse_frame(image, cv2.aruco.DICT_6X6_250)
+
+        if False:
+            frame_path = "test_images/capture_10.png"
+            image = cv2.imread(frame_path)
+            frame_data = self.anaylse_frame(image, cv2.aruco.DICT_6X6_250)
+        elif False:
+            name = "test_videos/test40"
+            frame_data = self.analyse_video(f"{name}.avi")
+            np.save(f"{name}.npy", frame_data)
+        else:
+            name = "test_videos/test40"
+            frame_data = np.load(f"{name}.npy",allow_pickle='TRUE').item()
 
         chosen_marker = 1
         relative_frame_data = self.get_relative_dict(frame_data, chosen_marker)
@@ -257,9 +268,7 @@ if __name__ == "__main__":
     frame_analyser = Frame_Analyser()
 
     #frame_analyser.test_single_frame()
-    #frame_analyser.test_realtime()
-
-    frame_analyser.analyse_video("test_videos/test40.avi")
+    frame_analyser.test_realtime()
 
     #composedRvec, composedTvec = frame_analyser.relative_position(rt_frame_data["ids"][1]["marker_rvecs"], rt_frame_data["ids"][1]["marker_tvecs"], rt_frame_data["ids"][2]["marker_rvecs"], rt_frame_data["ids"][2]["marker_tvecs"])
 
