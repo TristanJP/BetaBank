@@ -20,8 +20,17 @@ class Frame_Analyser:
         cal = Calibrate(path)
         self.calibration_data = cal.calibrate_camera()
 
-    def analyse_video(self, video_path):
-        print("test")
+    def analyse_video(self, video_path, search_aruco_dict=cv2.aruco.DICT_6X6_250):
+        aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
+
+        cap = cv2.VideoCapture(video_path)
+        print(cap.get(5))
+        delay = int((1/cap.get(5))*1000)
+        while(cap.isOpened()):
+            ret, frame = cap.read()
+            cv2.imshow('frame',frame)
+            if cv2.waitKey(delay) & 0xFF == ord('q'):
+                break
 
     def anaylse_frame(self, frame, search_aruco_dict=cv2.aruco.DICT_6X6_250):
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
@@ -233,8 +242,9 @@ if __name__ == "__main__":
     frame_analyser = Frame_Analyser()
 
     #frame_analyser.test_single_frame()
+    #frame_analyser.test_realtime()
 
-    frame_analyser.test_realtime()
+    frame_analyser.analyse_video("test_videos/test60.avi")
 
     #composedRvec, composedTvec = frame_analyser.relative_position(rt_frame_data["ids"][1]["marker_rvecs"], rt_frame_data["ids"][1]["marker_tvecs"], rt_frame_data["ids"][2]["marker_rvecs"], rt_frame_data["ids"][2]["marker_tvecs"])
 
