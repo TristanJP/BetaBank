@@ -1,5 +1,6 @@
 import time
 import cv2
+import os
 from cv2 import aruco
 import numpy as np
 from glob import glob
@@ -10,12 +11,18 @@ class Calibrate:
     search_aruco_dict: None
     board = cv2.aruco.CharucoBoard_create(7,9,.025,.0125, calibrate_aruco_dict)
     CALIBRATION_IMAGE_PATH: str
+    CALIBRATION_STORED_DATA = None
 
     calibration_data: dict
 
     def __init__(self, path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250):
         self.CALIBRATION_IMAGE_PATH = path
         self.search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
+
+        name = f"{path}.yaml"
+        for root, dirs, files in os.walk(path):
+            if name in files:
+                self.CALIBRATION_STORED_DATA = os.path.join(root, name)      
 
     # CREATE CHARUCO BOARD
     def generate_charuco_board(self):
@@ -77,32 +84,62 @@ class Calibrate:
 
     def calibrate_camera(self):
         print("CAMERA CALIBRATION:")
-        # Calibrates the camera using the detected corners.
-        all_corners, all_ids, imsize = self.read_chessboards()
+        if self.CALIBRATION_STORED_DATA != None:
+            print(f"  Found and loading calibration data from: {self.CALIBRATION_STORED_DATA}")
+            self.calibration_data = self.loadCoefficients(self.CALIBRATION_STORED_DATA)
+        else:
+            print("Generating new calibration data...")
+            # Calibrates the camera using the detected corners.
+            all_corners, all_ids, imsize = self.read_chessboards()
 
-        cameraMatrixInit = np.array([[ 1000.,    0., imsize[0]/2.],
-                                    [    0., 1000., imsize[1]/2.],
-                                    [    0.,    0.,           1.]])
+            cameraMatrixInit = np.array([[ 1000.,    0., imsize[0]/2.],
+                                        [    0., 1000., imsize[1]/2.],
+                                        [    0.,    0.,           1.]])
 
-        distCoeffsInit = np.zeros((5,1))
-        flags = (cv2.CALIB_USE_INTRINSIC_GUESS + cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_ASPECT_RATIO)
-        #flags = (cv2.CALIB_RATIONAL_MODEL)
-        (ret, camera_matrix, distortion_coefficients,
-        rotation_vectors, translation_vectors,
-        stdDeviationsIntrinsics, stdDeviationsExtrinsics,
-        perViewErrors) = cv2.aruco.calibrateCameraCharucoExtended(
-                        charucoCorners=all_corners,
-                        charucoIds=all_ids,
-                        board=self.board,
-                        imageSize=imsize,
-                        cameraMatrix=cameraMatrixInit,
-                        distCoeffs=distCoeffsInit,
-                        flags=flags,
-                        criteria=(cv2.TERM_CRITERIA_EPS & cv2.TERM_CRITERIA_COUNT, 10000, 1e-9))
+            distCoeffsInit = np.zeros((5,1))
+            flags = (cv2.CALIB_USE_INTRINSIC_GUESS + cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_ASPECT_RATIO)
+            #flags = (cv2.CALIB_RATIONAL_MODEL)
+            (ret, camera_matrix, distortion_coefficients,
+            rotation_vectors, translation_vectors,
+            stdDeviationsIntrinsics, stdDeviationsExtrinsics,
+            perViewErrors) = cv2.aruco.calibrateCameraCharucoExtended(
+                            charucoCorners=all_corners,
+                            charucoIds=all_ids,
+                            board=self.board,
+                            imageSize=imsize,
+                            cameraMatrix=cameraMatrixInit,
+                            distCoeffs=distCoeffsInit,
+                            flags=flags,
+                            criteria=(cv2.TERM_CRITERIA_EPS & cv2.TERM_CRITERIA_COUNT, 10000, 1e-9))
 
-        self.calibration_data = {"ret": ret, "cam_mtx": camera_matrix, "dist_coef": distortion_coefficients, "cam_rvecs": rotation_vectors, "cam_tvecs": translation_vectors}
+            self.calibration_data = {"ret": ret, "cam_mtx": camera_matrix, "dist_coef": distortion_coefficients, "cam_rvecs": rotation_vectors, "cam_tvecs": translation_vectors}
+            self.saveCoefficients(f"{self.CALIBRATION_IMAGE_PATH}/{self.CALIBRATION_IMAGE_PATH}.yaml", camera_matrix, distortion_coefficients)
+            
         print("DONE")
         return self.calibration_data
+
+    def saveCoefficients(self, path, mtx, dist):
+        cv_file = cv2.FileStorage(f"{path}", cv2.FILE_STORAGE_WRITE)
+        cv_file.write("camera_matrix", mtx)
+        cv_file.write("dist_coeff", dist)
+        # note you *release* you don't close() a FileStorage object
+        cv_file.release()
+
+    def loadCoefficients(self, path):
+        # FILE_STORAGE_READ
+        cv_file = cv2.FileStorage(f"{path}", cv2.FILE_STORAGE_READ)
+
+        # note we also have to specify the type to retrieve other wise we only get a
+        # FileNode object back instead of a matrix
+        camera_matrix = cv_file.getNode("camera_matrix").mat()
+        dist_matrix = cv_file.getNode("dist_coeff").mat()
+
+        # Debug: print the values
+        # print("camera_matrix : ", camera_matrix.tolist())
+        # print("dist_matrix : ", dist_matrix.tolist())
+
+        cv_file.release()
+        return {"cam_mtx": camera_matrix, "dist_coef": dist_matrix}
 
     # show images
     def show_images(self, images: list):
