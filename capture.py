@@ -33,7 +33,7 @@ class Capture:
                 i += 1
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
-                cam.release_camera()
+                self.cam.release_camera()
                 break
     
     def take_video(self, grayscale, video_folder, filename, search_aruco_dict=cv2.aruco.DICT_6X6_250):
@@ -58,7 +58,6 @@ class Capture:
 
             # Save frame
             out.write(gray)
-
             cv2.imshow('frame', frame_markers)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -71,6 +70,6 @@ if __name__ == "__main__":
     
     cap = Capture()
 
-    #cap.take_pictures(False, "test_images")
+    cap.take_pictures(False, "test_images")
 
-    cap.take_video(False, "test_videos", "test60.avi")
+    #cap.take_video(False, "test_videos", "test60.avi")
