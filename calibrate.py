@@ -154,7 +154,7 @@ class Calibrate:
 
     def get_undistorted_image(self, fname: str) -> list:
         frame = cv2.imread(fname)
-        img_undist = cv2.undistort(frame, self.camera_matrix, self.distortion_coefficients, None)
+        img_undist = cv2.undistort(frame, self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], None)
         return [frame, img_undist]
 
     def show_pose_for_image(self, image):
@@ -221,7 +221,6 @@ if __name__ == "__main__":
     
     # Calibrate based on images
     cal = Calibrate(path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250)
-
 
     cal.calibrate_camera()
 
