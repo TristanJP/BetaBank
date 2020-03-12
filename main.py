@@ -54,9 +54,9 @@ class Main():
             frame = self.cam.current_frame
             ret = self.cam.successful_read
 
-            average_rvec, average_tvec = self.get_origin_for_frame(frame)
+            origin_rvec, origin_tvec = self.get_origin_for_frame(frame)
 
-            self.view.render_realtime_vectors(frame, ret, average_rvec, average_tvec) # frame, ret, relative_frame_data, average_tvec, average_rvec
+            self.view.render_origin(frame, ret, origin_rvec, origin_tvec) # frame, ret, relative_frame_data, average_tvec, average_rvec
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.cam.release_camera()
@@ -75,7 +75,7 @@ class Main():
 
             origin_rvec, origin_tvec = self.get_origin_for_frame(frame)
 
-            main.view.render_origin(frame, ret, origin_rvec, origin_tvec)
+            self.view.render_origin(frame, ret, origin_rvec, origin_tvec)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.cam.release_camera()
@@ -86,8 +86,8 @@ if __name__ == "__main__":
 
     main = Main()
 
-    #main.run_realtime_relative(1)
-    main.run_video_relative(1)
+    main.run_realtime_relative(1)
+    #main.run_video_relative(1)
 
     # main.camera.start()
 
