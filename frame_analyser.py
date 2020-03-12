@@ -167,7 +167,13 @@ class Frame_Analyser:
 
         return None, None
 
-    def find_origin_in_frame(self, frame, relative_dict):
+    def find_origin_for_frame(self, frame, relative_frame_data):
+        rt_frame_data = self.anaylse_frame(frame)
+        combined_frame_data = self.get_combined_dict(rt_frame_data, relative_frame_data)
+        average_rvec, average_tvec = self.get_average_of_vectors(combined_frame_data)
+        return average_rvec, average_tvec
+
+    def test_on_frame(self, frame, relative_dict):
         # Get frame images etc.
         frame_path = "test_images/capture_10.png"
         alt_frame_path = "test_images/capture_14.png"
