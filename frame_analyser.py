@@ -7,6 +7,7 @@ import numpy as np
 from camera import Camera
 from effects import Effects
 import copy
+import time
 
 class Frame_Analyser:
 
@@ -39,11 +40,13 @@ class Frame_Analyser:
 
             if show:
                 cv2.imshow('frame',frame)
-            
-            if (cv2.waitKey(delay) & 0xFF == ord('q')) or (num_markers == 12):
-                cap.release()
+                if (cv2.waitKey(delay) & 0xFF == ord('q')):
+                    cap.release()
+                    break
+
+            if num_markers == 12:
                 break
-        
+
         return largest_frame_data
 
     def anaylse_frame(self, frame, search_aruco_dict=cv2.aruco.DICT_6X6_250):
@@ -138,6 +141,8 @@ class Frame_Analyser:
         combined_dict = {}
         combined_body = {}
         for marker_id in frame_data["ids"]:
+            if marker_id not in relative_data:
+                continue
             combined_data = cv2.composeRT(relative_data[marker_id]["relative_rvec"], relative_data[marker_id]["relative_tvec"], frame_data["ids"][marker_id]["marker_rvecs"].T, frame_data["ids"][marker_id]["marker_tvecs"].T)
             combined_body["combined_rvec"], combined_body["combined_tvec"] = combined_data[0], combined_data[1]
             combined_dict[marker_id] = combined_body.copy()
