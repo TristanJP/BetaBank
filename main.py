@@ -46,9 +46,9 @@ class Main():
         average_rvec, average_tvec = self.frame_analyser.get_average_of_vectors(combined_frame_data)
         return average_rvec, average_tvec
 
-    def run(self):
+    def run_realtime_relative(self, marker_id):
         input_data = "test_images/capture_0.png"  
-        main.calculate_relative_dict(input_data, 1)
+        main.calculate_relative_dict(input_data, marker_id)
 
         while True:
             frame = self.cam.current_frame
@@ -56,7 +56,26 @@ class Main():
 
             average_rvec, average_tvec = self.get_origin_for_frame(frame)
 
-            main.view.render_realtime_relative(frame, ret, main.relative_frame_data, average_rvec, average_tvec) # frame, ret, relative_frame_data, average_tvec, average_rvec
+            self.view.render_realtime_vectors(frame, ret, average_rvec, average_tvec) # frame, ret, relative_frame_data, average_tvec, average_rvec
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.cam.release_camera()
+                break
+    
+    def run_video_relative(self, marker_id):
+        video_path = "test_videos/test1.avi"  
+        self.calculate_relative_dict(video_path, marker_id)
+
+        cap = cv2.VideoCapture(video_path)
+        delay = int((1/cap.get(5))*(1000/2))
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            origin_rvec, origin_tvec = self.get_origin_for_frame(frame)
+
+            main.view.render_origin(frame, ret, origin_rvec, origin_tvec)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.cam.release_camera()
@@ -66,9 +85,9 @@ class Main():
 if __name__ == "__main__":
 
     main = Main()
-    main.run()
 
-    
+    #main.run_realtime_relative(1)
+    main.run_video_relative(1)
 
     # main.camera.start()
 
