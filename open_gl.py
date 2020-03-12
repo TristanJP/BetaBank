@@ -77,6 +77,7 @@ def Plane(struct):
             vert = plane_verticies_central[i]
             glTexCoord2f(tex[0], tex[1])
             glVertex3f(vert[0], vert[1], vert[2])
+            i+=1
         glEnd()
 
 def Cube(struct):
@@ -177,7 +178,7 @@ def main():
 
         glRotatef(1, 0, 1, 0)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        Cube(False)
+        Plane(False)
         pygame.display.flip()
         pygame.time.wait(10)
 
