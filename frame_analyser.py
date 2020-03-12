@@ -12,8 +12,8 @@ class Frame_Analyser:
 
     calibration_data: dict
 
-    def __init__(self):
-        self.calibrate()
+    def __init__(self, calibration_data):
+        self.calibration_data = calibration_data
         self.detection = Detection(self.calibration_data)
 
     def calibrate(self, path="calibration_images"):
@@ -93,79 +93,6 @@ class Frame_Analyser:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-    def render(self, image, mtx, dist, marker_rvecs, marker_tvecs):
-        effects = Effects()
-        effects.render(image, mtx, dist, True, marker_rvecs, marker_tvecs, "axis")
-
-        while True:
-            cv2.imshow("frame", image)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
-    def render_video_relative(self, mtx, dist, relative_frame_data, video_path):
-        effects = Effects()
-        cap = cv2.VideoCapture(video_path)
-        delay = int((1/cap.get(5))*(1000/2))
-        while(cap.isOpened()):
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            rt_frame_data = self.anaylse_frame(frame)
-
-            combined_frame_data = self.get_combined_dict(rt_frame_data, relative_frame_data)
-
-            average_rvec, average_tvec = self.get_average_of_vectors(combined_frame_data)
-
-            if average_tvec is not None:
-                effects.render(frame, mtx, dist, ret, average_rvec, average_tvec, "axis")
-
-            cv2.imshow("frame", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
-    def render_realtime_by_marker_id(self, mtx, dist, marker_id):
-        cam = Camera(self.calibration_data)
-        cam.start()
-        effects = Effects()
-
-        while True:
-            frame = cam.current_frame
-            ret = cam.successful_read
-
-            rt_frame_data = self.anaylse_frame(frame)
-
-            if marker_id in rt_frame_data["ids"]:
-                effects.render(frame, mtx, dist, ret, rt_frame_data["ids"][marker_id]["marker_rvecs"], rt_frame_data["ids"][marker_id]["marker_tvecs"], "axis")
-
-            cv2.imshow("frame", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                cam.release_camera()
-                break
-
-    def render_realtime_relative(self, mtx, dist, relative_frame_data):
-        cam = Camera(self.calibration_data)
-        cam.start()
-        effects = Effects()
-
-        while True:
-            frame = cam.current_frame
-            ret = cam.successful_read
-
-            rt_frame_data = self.anaylse_frame(frame)
-
-            combined_frame_data = self.get_combined_dict(rt_frame_data, relative_frame_data)
-
-            average_rvec, average_tvec = self.get_average_of_vectors(combined_frame_data)
-
-            if average_tvec is not None:
-                effects.render(frame, mtx, dist, ret, average_rvec, average_tvec, "cube")
-
-            cv2.imshow("frame", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                cam.release_camera()
-                break
-
     def inverse_perspective(self, rvec, tvec):
         R, _ = cv2.Rodrigues(rvec)
         R = np.matrix(R).T
@@ -235,7 +162,7 @@ class Frame_Analyser:
 
         return None, None
 
-    def test_single_frame(self):
+    def find_origin_in_frame(self, frame, relative_dict):
         # Get frame images etc.
         frame_path = "test_images/capture_10.png"
         alt_frame_path = "test_images/capture_14.png"
