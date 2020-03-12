@@ -40,6 +40,12 @@ class Main():
         self.relative_frame_data = self.frame_analyser.get_relative_dict(frame_data, origin_marker_id)
         return self.relative_frame_data
 
+    def get_origin_for_frame(self, frame):
+        rt_frame_data = self.frame_analyser.anaylse_frame(frame)
+        combined_frame_data = self.frame_analyser.get_combined_dict(rt_frame_data, self.relative_frame_data)
+        average_rvec, average_tvec = self.frame_analyser.get_average_of_vectors(combined_frame_data)
+        return average_rvec, average_tvec
+
     def run(self):
         input_data = "test_images/capture_0.png"  
         main.calculate_relative_dict(input_data, 1)
@@ -48,9 +54,7 @@ class Main():
             frame = self.cam.current_frame
             ret = self.cam.successful_read
 
-            rt_frame_data = self.frame_analyser.anaylse_frame(frame)
-            combined_frame_data = self.frame_analyser.get_combined_dict(rt_frame_data, self.relative_frame_data)
-            average_rvec, average_tvec = self.frame_analyser.get_average_of_vectors(combined_frame_data)
+            average_rvec, average_tvec = self.get_origin_for_frame(frame)
 
             main.view.render_realtime_relative(frame, ret, main.relative_frame_data, average_rvec, average_tvec) # frame, ret, relative_frame_data, average_tvec, average_rvec
 
