@@ -102,10 +102,6 @@ class Plane_Test():
 
         glTranslatef(0.0,0.0, -5)
 
-        aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
-
-        
-
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -113,33 +109,11 @@ class Plane_Test():
                     pygame.quit()
                     quit()
 
-            frame = self.cam.get_current_frame()
-            # frame_data = self.detection.get_markers_in_frame(frame, aruco_dict)
-
-            # rmtx = cv2.Rodrigues(frame_data["ids"][1]["marker_rvecs"])[0]
-            # tvecs = frame_data["ids"][1]["marker_tvecs"][0]
-
-            # view_matrix = np.array([[rmtx[0][0],rmtx[0][1],rmtx[0][2],tvecs[0]],
-            #                         [rmtx[1][0],rmtx[1][1],rmtx[1][2],tvecs[1]],
-            #                         [rmtx[2][0],rmtx[2][1],rmtx[2][2],tvecs[2]],
-            #                         [0.0       ,0.0       ,0.0       ,1.0    ]])
-
-            # view_matrix = view_matrix * self.INVERSE_MATRIX
-
-            # view_matrix = np.transpose(view_matrix)
-
-            # glPushMatrix()
-            # glLoadMatrixd(view_matrix)
-
-            # glColor3f(1.0, 1.0, 1.0)
-            # glPopMatrix()
-
             glRotatef(1, 0, 1, 0)
-
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+            frame = self.cam.get_current_frame()
             self.loadTexture(frame)
-
             self.Plane()
-
             pygame.display.flip()
             pygame.time.wait(10)
 
