@@ -1,8 +1,10 @@
 import cv2
+import os
 from cv2 import aruco
 from detection import Detection
 from camera import Camera
 from frame_analyser import Frame_Analyser
+import numpy as np
 from view import View
 
 class Main():
@@ -11,7 +13,7 @@ class Main():
     relative_frame_data: dict
 
     def __init__(self):
-        print("running")
+        print("running\n")
         self.cam = Camera()
         self.calibration_data = self.cam.get_calibration_data()
         self.cam.start()
@@ -21,18 +23,35 @@ class Main():
         self.view = View(self.calibration_data)
 
     def get_frame_data(self, input_data):
-        if type(input_data) == str:
-            file_type = input_data[-4:]
-            if file_type in (".avi"):
-                frame_data = self.frame_analyser.analyse_video(input_data)
-            elif file_type in (".png", ".jpg"):
-                image = cv2.imread(input_data)
-                frame_data = self.frame_analyser.anaylse_frame(image)
-            else:
-                frame_data = None
-        else:
-            frame_data = self.frame_analyser.anaylse_frame(input_data)
+        frame_data = None
+        print("\nGetting Init Frame Data:")
+        path = input_data.split("/")
+        new_name = f"{path[1][:-4]}_FD.npy"
+        for root, dirs, files in os.walk(path[0]):
+            if new_name in files:
+                print(f" Found previous data: {path[0]}/{new_name}, loading...")
+                frame_data = np.load(f"{path[0]}/{new_name}", allow_pickle='TRUE').item()
+                break
 
+        if frame_data is None:
+            if type(input_data) == str:
+                print("  Generating Frame Data...")
+                file_type = input_data[-4:]
+                if file_type in (".avi"):
+                    frame_data = self.frame_analyser.analyse_video(input_data)
+                elif file_type in (".png", ".jpg"):
+                    image = cv2.imread(input_data)
+                    frame_data = self.frame_analyser.anaylse_frame(image)
+                else:
+                    frame_data = None
+                np.save(f"{path[0]}/{new_name}", frame_data)
+                print(f"  Saved data as: {path[0]}/{new_name}")
+            elif False:
+                # Do not support frames as input
+                frame_data = self.frame_analyser.anaylse_frame(input_data)
+            else:
+                print("  Frame Data failed!")
+        print("DONE FRAME DATA")
         return frame_data
 
     def calculate_relative_dict(self, input_data, origin_marker_id):
@@ -41,9 +60,7 @@ class Main():
         return self.relative_frame_data
 
     def run_realtime_relative(self, marker_id):
-        input_data = "test_images/capture_0.png"  
-        self.calculate_relative_dict(input_data, marker_id)
-
+        print("\nRunning Realtime")
         while True:
             frame = self.cam.current_frame
             ret = self.cam.successful_read
@@ -56,10 +73,8 @@ class Main():
                 self.cam.release_camera()
                 break
 
-    def run_video_relative(self, marker_id):
-        video_path = "test_videos/test1.avi"  
-        self.calculate_relative_dict(video_path, marker_id)
-
+    def run_video_relative(self, video_path, marker_id):
+        print("\nRunning Video")
         cap = cv2.VideoCapture(video_path)
         delay = int((1/cap.get(5))*(1000/2))
         while True:
@@ -79,9 +94,18 @@ class Main():
 if __name__ == "__main__":
 
     main = Main()
+    marker_id = 1
 
-    #main.run_realtime_relative(1)
-    main.run_video_relative(1)
+    ### Initial Frame Data
+    #main.calculate_relative_dict("test_images/capture_0.png" , marker_id)
+    main.calculate_relative_dict("test_videos/test1.avi", marker_id)
+
+    ### Run
+    #main.run_realtime_relative(marker_id)
+    main.run_video_relative("test_videos/test1.avi", marker_id)
+
+
+
 
     # main.camera.start()
 
