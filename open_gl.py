@@ -5,6 +5,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 cube_verticies_central = (
+    # x  y  z
     (1, -1, -1),
     (1, 1, -1),
     (-1, 1, -1),
@@ -15,30 +16,19 @@ cube_verticies_central = (
     (-1, 1, 1)
     )
 
-cube_verticies_corner = (
-    (0, 0, 0),
-    (1, 1, -1),
-    (-1, 1, -1),
-    (-1, -1, -1),
-    (1, -1, 1),
-    (1, 1, 1),
-    (-1, -1, 1),
-    (-1, 1, 1)
-    )
-
 cube_edges = (
-    (0,1),
-    (0,3),
-    (0,4),
-    (2,1),
-    (2,3),
-    (2,7),
-    (6,3),
-    (6,4),
-    (6,7),
-    (5,1),
-    (5,4),
-    (5,7)
+    (0, 1),
+    (0, 3),
+    (0, 4),
+    (2, 1),
+    (2, 3),
+    (2, 7),
+    (6, 3),
+    (6, 4),
+    (6, 7),
+    (5, 1),
+    (5, 4),
+    (5, 7)
     )
 
 plane_edges = (
@@ -60,9 +50,9 @@ texCoords = (
     (1.0, 1.0),
     (0.0, 1.0),
     (0.0, 0.0)
-)
+    )
 
-def Plane(struct):
+def Plane(struct=False):
     if struct:
         glBegin(GL_LINES)
         for edge in plane_edges:
@@ -80,7 +70,7 @@ def Plane(struct):
             i+=1
         glEnd()
 
-def Cube(struct):
+def Cube(struct=False):
     if struct:
         glBegin(GL_LINES)
         for edge in cube_edges:
@@ -140,7 +130,7 @@ def Cube(struct):
         glEnd()
 
 def loadTexture():
-    textureSurface = pygame.image.load('images/thai.jpg')
+    textureSurface = pygame.image.load('images/test_text.jpg')
     textureData = pygame.image.tostring(textureSurface, "RGBA", 1)
     width = textureSurface.get_width()
     height = textureSurface.get_height()
@@ -166,7 +156,7 @@ def main():
 
     loadTexture()
 
-    gluPerspective(45, (display[0]/display[1]), 0.1, 90.0)
+    gluPerspective(60, (display[0]/display[1]), 0.1, 90.0)
 
     glTranslatef(0.0,0.0, -5)
 
@@ -178,7 +168,8 @@ def main():
 
         glRotatef(1, 0, 1, 0)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        Plane(False)
+        Plane()
+        #Cube()
         pygame.display.flip()
         pygame.time.wait(10)
 

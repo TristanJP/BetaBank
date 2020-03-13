@@ -95,18 +95,33 @@ class Main():
                 cap.release()
                 break
 
+    def run_realtime_opengl_image(self, marker_id):
+        print("\nRunning Realtime with OpenGL Image")
+        while True:
+            frame = self.cam.current_frame
+            ret = self.cam.successful_read
+
+            origin_rvec, origin_tvec = self.frame_analyser.find_origin_for_frame(frame, self.relative_frame_data)
+
+            self.view.image_in_realtime(frame)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.cam.release_camera()
+                break
+
 if __name__ == "__main__":
 
     main = Main()
     marker_id = 1
 
     ### Initial Frame Data
-    #main.calculate_relative_dict("test_images/capture_0.png" , marker_id)
-    main.calculate_relative_dict("test_videos/test2.avi", marker_id)
+    main.calculate_relative_dict("test_images/capture_0.png" , marker_id)
+    #main.calculate_relative_dict("test_videos/test2.avi", marker_id)
 
     ### Run
     #main.run_realtime_relative(marker_id)
-    main.run_video_relative("test_videos/test2.avi", marker_id)
+    #main.run_video_relative("test_videos/test2.avi", marker_id. False)
+    main.run_realtime_opengl_image(marker_id)
 
 
 

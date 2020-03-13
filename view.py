@@ -11,6 +11,7 @@ import copy
 
 import pygame
 from pygame.locals import *
+from PIL import Image
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -31,7 +32,7 @@ class View:
     def image_in_video(self, ):
         print("image_in_video")
 
-    def image_in_realtime(self):
+    def image_in_realtime(self, frame):
         print("image_in_realtime")
 
     def video_in_video(self):
