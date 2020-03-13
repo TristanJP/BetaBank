@@ -55,8 +55,6 @@ class Main():
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.cam.release_camera()
                 break
-    
-    # JOIN THESE BASTARDS WITH CAM
 
     def run_video_relative(self, marker_id):
         video_path = "test_videos/test1.avi"  
