@@ -85,7 +85,7 @@ class Calibrate:
     def calibrate_camera(self):
         print("CAMERA CALIBRATION:")
         if self.CALIBRATION_STORED_DATA != None:
-            print(f"  Found and loading calibration data from: {self.CALIBRATION_STORED_DATA}")
+            print(f"  Found calibration data: {self.CALIBRATION_STORED_DATA}, loading...")
             self.calibration_data = self.loadCoefficients(self.CALIBRATION_STORED_DATA)
         else:
             print("Generating new calibration data...")
@@ -115,7 +115,7 @@ class Calibrate:
             self.calibration_data = {"ret": ret, "cam_mtx": camera_matrix, "dist_coef": distortion_coefficients, "cam_rvecs": rotation_vectors, "cam_tvecs": translation_vectors}
             self.saveCoefficients(f"{self.CALIBRATION_IMAGE_PATH}/{self.CALIBRATION_IMAGE_PATH}.yaml", camera_matrix, distortion_coefficients)
             
-        print("DONE")
+        print("DONE CALIBRATION")
         return self.calibration_data
 
     def saveCoefficients(self, path, mtx, dist):

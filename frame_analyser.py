@@ -46,7 +46,6 @@ class Frame_Analyser:
 
             if num_markers == 12:
                 break
-
         return largest_frame_data
 
     def anaylse_frame(self, frame, search_aruco_dict=cv2.aruco.DICT_6X6_250):
