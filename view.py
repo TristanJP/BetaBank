@@ -40,67 +40,9 @@ class View:
     def video_in_realtime(self):
         print("video_in_realtime")
 
-    def render(self, image, marker_rvecs, marker_tvecs, shape):
-        effects = Effects()
-        effects.render(image, self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], True, marker_rvecs, marker_tvecs, shape)
-
-        while True:
-            cv2.imshow("frame", image)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
-    # def render_video_relative(self, relative_frame_data, video_path):
-    #     effects = Effects()
-    #     cap = cv2.VideoCapture(video_path)
-    #     delay = int((1/cap.get(5))*(1000/2))
-    #     while(cap.isOpened()):
-    #         ret, frame = cap.read()
-    #         if not ret:
-    #             break
-
-    #         rt_frame_data = self.anaylse_frame(frame)
-
-    #         combined_frame_data = self.get_combined_dict(rt_frame_data, relative_frame_data)
-
-    #         average_rvec, average_tvec = self.get_average_of_vectors(combined_frame_data)
-
-    #         if average_tvec is not None:
-    #             effects.render(frame, self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], ret, average_rvec, average_tvec, "axis")
-
-    #         cv2.imshow("frame", frame)
-    #         if cv2.waitKey(1) & 0xFF == ord('q'):
-    #             break
-
-    # def render_realtime_by_marker_id(self, marker_id):
-    #     cam = Camera(self.calibration_data)
-    #     cam.start()
-    #     effects = Effects()
-
-    #     while True:
-    #         frame = cam.current_frame
-    #         ret = cam.successful_read
-
-    #         rt_frame_data = self.anaylse_frame(frame)
-
-    #         if marker_id in rt_frame_data["ids"]:
-    #             effects.render(frame, self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], ret, rt_frame_data["ids"][marker_id]["marker_rvecs"], rt_frame_data["ids"][marker_id]["marker_tvecs"], "axis")
-
-    #         cv2.imshow("frame", frame)
-    #         if cv2.waitKey(1) & 0xFF == ord('q'):
-    #             cam.release_camera()
-    #             break
-
     def render_origin(self, frame, ret, origin_rvec, origin_tvec):
         effects = Effects()
 
         if origin_tvec is not None:
             effects.render(frame, self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], ret, origin_rvec, origin_tvec, "cube")
         cv2.imshow("frame", frame)
-
-
-if __name__ == "__main__":
-    view = View()
-
-    view.render()
-
-    #view.image_in_image(master_image_path, child_image_path)
