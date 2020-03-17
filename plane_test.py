@@ -23,6 +23,9 @@ class Plane_Test():
                                [-1.0,-1.0,-1.0,-1.0],
                                [ 1.0, 1.0, 1.0, 1.0]])
 
+    transTuple = (255, 0, 255)
+    blackTuple = (100, 100, 100)
+
     plane_edges = (
         (0,1),
         (0,3),
@@ -31,10 +34,10 @@ class Plane_Test():
         )
 
     plane_verticies_central = (
-        (1, -1, 0),
-        (1, 1, 0),
+        (-1, -1, 0),
         (-1, 1, 0),
-        (-1, -1, 0)
+        (1, 1, 0),
+        (1, -1, 0)
         )
 
     texCoords = (
@@ -54,7 +57,7 @@ class Plane_Test():
         # initialise texture
         self.texture_background = None
 
-    def Plane(self, scale, struct=False):
+    def Plane(self, scale_x, scale_y, struct=False):
         if struct:
             glBegin(GL_LINES)
             for edge in self.plane_edges:
@@ -68,7 +71,7 @@ class Plane_Test():
                 tex = self.texCoords[i]
                 vert = self.plane_verticies_central[i]
                 glTexCoord2f(tex[0], tex[1])
-                glVertex3f(vert[0]*scale, vert[1]*scale, vert[2]*scale)
+                glVertex3f(vert[0]*scale_x, vert[1]*scale_y, vert[2]*1)
                 i+=1
             glEnd()
 
@@ -107,36 +110,80 @@ class Plane_Test():
         glBindTexture(GL_TEXTURE_2D, self.texture_background)
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, ix, iy, 0, GL_RGBA, GL_UNSIGNED_BYTE, bg_image)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1280, 720, 0, GL_RGBA, GL_UNSIGNED_BYTE, bg_image)
         
         # draw background
         glBindTexture(GL_TEXTURE_2D, self.texture_background)
         glPushMatrix()
-        #self.loadTexture(frame)
+        
         #glTranslatef(0.0,0.0,-10.0)
         glBegin(GL_QUADS)
-        glTexCoord2f(0.0, 1.0); glVertex3f(-4.0, -3.0, 0.0)
-        glTexCoord2f(1.0, 1.0); glVertex3f( 4.0, -3.0, 0.0)
-        glTexCoord2f(1.0, 0.0); glVertex3f( 4.0,  3.0, 0.0)
-        glTexCoord2f(0.0, 0.0); glVertex3f(-4.0,  3.0, 0.0)
+        glTexCoord2f(0.0, 1.0); glVertex3f(-4.0, -2.25, 0.0)
+        glTexCoord2f(1.0, 1.0); glVertex3f( 4.0, -2.25, 0.0)
+        glTexCoord2f(1.0, 0.0); glVertex3f( 4.0,  2.25, 0.0)
+        glTexCoord2f(0.0, 0.0); glVertex3f(-4.0,  2.25, 0.0)
         glEnd( )
         glPopMatrix()
 
-        return bg_image
+        return self.texture_background
 
-    def main(self):
+    def placeScene(self):
+        glLoadIdentity()
+        gluPerspective(90, 1, 0.05, 100)
+        glTranslatef(0,0,0)
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        glBegin(GL_QUADS)
+        glTexCoord2f(0,0)
+        glVertex3f(-4,-4,-4)
+        glTexCoord2f(0,1)
+        glVertex3f(-4,4,-4)
+        glTexCoord2f(1,1)
+        glVertex3f(4,4,-4)
+        glTexCoord2f(1,0)
+        glVertex3f(4,-4,-4)
+        glEnd()
+
+    def create_display(self):
         pygame.init()
         width = 1280
         height = 720
-        display = (width, height)
-        pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
+        self.display = (width, height)
+        screen = pygame.display.set_mode(self.display, DOUBLEBUF|OPENGL)
+        pygame.display.set_caption('Beta Bank')
+        return screen
+
+    def createSurfaces(self, screen):
+        background = pygame.Surface(screen.get_size())
+        background.fill(self.blackTuple)
+        sprite = pygame.Surface(screen.get_size())
+        sprite.set_colorkey(self.transTuple)
+        return background
+
+    def loadScene(self, bgImg):
+        #img = cv2.flip(frame, 0)
+        #img = Image.fromarray(img)     
+        # ix = img.size[0]
+        # iy = img.size[1]
+        #img = img.tobytes('raw', 'BGRX', 0, -1)
+
+        img = pygame.image.load(bgImg)
+        textureData = pygame.image.tostring(img, "RGB", 1)
+        width = img.get_width()
+        height = img.get_height()
+        bgImgGL = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, bgImgGL)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData)
+        glEnable(GL_TEXTURE_2D)
+
+    def main(self):
+        screen = self.create_display()
+        background = self.createSurfaces(screen)
 
         glEnable(GL_TEXTURE_2D)
 
         image = cv2.imread("images/test_text.jpg")
-
-        gluPerspective(60, (display[0]/display[1]), 0.1, 90.0)
-        glTranslatef(0.0,0.0, -5)
+        self.loadScene("images/thai.jpg")
 
         self.texture_background = glGenTextures(1)
         
@@ -145,32 +192,39 @@ class Plane_Test():
         search_aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
 
         while True:
+            self.placeScene()
+            pygame.display.flip()
+            pygame.time.wait(10)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.cam.release_camera()
                     pygame.quit()
                     quit()
             
-            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-            glLoadIdentity()
+            #glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+            #glLoadIdentity()
 
-            gluPerspective(60, (display[0]/display[1]), 0.1, 90.0)
-            glTranslatef(0.0,0.0, -5)
+            #gluPerspective(45, (self.display[0]/self.display[1]), 0.1, 90.0)
+            #glTranslatef(0.0,0.0, -5.5)
             #glRotatef(45, 0, 1, 0)
 
             frame = self.cam.get_current_frame()
             
-            self.draw_background(frame)
+            #self.draw_background(frame)
+
+            #glLoadIdentity()
+            #gluPerspective(45, (self.display[0]/self.display[1]), 0.1, 90.0)
+            #glTranslatef(-10.0,7.0, -20)
             
             frame_data = self.detection.get_markers_in_frame(frame, search_aruco_dict)
 
             if 1 in frame_data["ids"]:
-                tvecs = frame_data["ids"][1]["marker_tvecs"][0]
+                tvecs = frame_data["ids"][1]["corners"]
                 x = tvecs[0]
                 y = tvecs[1]
-                z = tvecs[2]
+                #z = tvecs[2]
 
-                #glTranslatef(x,y, z)
+                #glTranslatef(x/50,-y/45, 0)
                 #self.draw_rect(0, 0, 200, 100)
 
             #self.refresh2d(width, height)
@@ -180,16 +234,9 @@ class Plane_Test():
             #glTranslatef(0.0,0.0, -5)
             
             #self.loadTexture(image)
-            #self.Plane(0.5)
-            #
-            # glRotatef(1, 0, 1, 0)
-
+            #self.Plane(1, 1)
             
-            #glTranslatef(0.0,0.0, -0.5)
-
-
-            pygame.display.flip()
-            pygame.time.wait(10)
+            # glRotatef(1, 0, 1, 0)
 
 
     def refresh2d(self, width, height):
