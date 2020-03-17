@@ -160,20 +160,21 @@ class Plane_Test():
         return background
 
     def loadScene(self, bgImg):
-        #img = cv2.flip(frame, 0)
-        #img = Image.fromarray(img)     
-        # ix = img.size[0]
-        # iy = img.size[1]
-        #img = img.tobytes('raw', 'BGRX', 0, -1)
+        #img = cv2.flip(bgImg, 0)
+        img = bgImg
+        img = Image.fromarray(img)     
+        ix = img.size[0]
+        iy = img.size[1]
+        img = img.tobytes('raw', 'BGRX', 0, -1)
 
-        img = pygame.image.load(bgImg)
-        textureData = pygame.image.tostring(img, "RGB", 1)
-        width = img.get_width()
-        height = img.get_height()
+        #img = pygame.image.load(bgImg)
+        #textureData = pygame.image.tostring(bgImg, "RGB", 1)
+        #width = img.get_width()
+        #height = img.get_height()
         bgImgGL = glGenTextures(1)
         glBindTexture(GL_TEXTURE_2D, bgImgGL)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ix, iy, 0, GL_RGBA, GL_UNSIGNED_BYTE, img)
         glEnable(GL_TEXTURE_2D)
 
     def main(self):
@@ -182,10 +183,11 @@ class Plane_Test():
 
         glEnable(GL_TEXTURE_2D)
 
-        image = cv2.imread("images/test_text.jpg")
-        self.loadScene("images/thai.jpg")
+        image = cv2.imread("images/test33.jpg")
+        frame = self.cam.get_current_frame()
+        self.loadScene(frame)
 
-        self.texture_background = glGenTextures(1)
+        #self.texture_background = glGenTextures(1)
         
         #glRotatef(1, 0, 1, 0)
 
