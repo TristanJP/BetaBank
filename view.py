@@ -29,6 +29,29 @@ class View:
     def image_in_image(self, master_image, child_image, master_frame_data):
         print("image_in_image")
 
+        pygame.init()
+        display = (800,600)
+        pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
+
+        loadTexture()
+
+        gluPerspective(60, (display[0]/display[1]), 0.1, 90.0)
+
+        glTranslatef(0.0,0.0, -5)
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+
+            glRotatef(1, 0, 1, 0)
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+            Plane()
+            #Cube()
+            pygame.display.flip()
+            pygame.time.wait(10)
+
     def image_in_video(self, ):
         print("image_in_video")
 

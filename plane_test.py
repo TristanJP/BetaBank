@@ -179,13 +179,13 @@ class Plane_Test():
 
     def main(self):
         screen = self.create_display()
-        background = self.createSurfaces(screen)
+        #background = self.createSurfaces(screen)
 
         glEnable(GL_TEXTURE_2D)
 
         image = cv2.imread("images/test33.jpg")
-        frame = self.cam.get_current_frame()
-        self.loadScene(frame)
+        #frame = self.cam.get_current_frame()
+        #self.loadScene(frame)
 
         #self.texture_background = glGenTextures(1)
         
@@ -203,8 +203,8 @@ class Plane_Test():
                     pygame.quit()
                     quit()
             
-            #glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-            #glLoadIdentity()
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+            glLoadIdentity()
 
             #gluPerspective(45, (self.display[0]/self.display[1]), 0.1, 90.0)
             #glTranslatef(0.0,0.0, -5.5)
@@ -230,13 +230,13 @@ class Plane_Test():
                 #glTranslatef(x/50,-y/45, 0)
                 #self.draw_rect(0, 0, 200, 100)
 
-            #self.refresh2d(width, height)
+            #self.refresh2d(1280, 720)
 
             #glColor3f(0.0, 0.0, 1.0)
 
-            #glTranslatef(0.0,0.0, -5)
+            glTranslatef(0.0,0.0, -5)
             
-            #self.loadTexture(image)
+            self.loadScene(image)
             #self.Plane(1, 1)
             
             # glRotatef(1, 0, 1, 0)
