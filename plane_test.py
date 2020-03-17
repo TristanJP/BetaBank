@@ -211,6 +211,7 @@ class Plane_Test():
             #glRotatef(45, 0, 1, 0)
 
             frame = self.cam.get_current_frame()
+            self.loadScene(frame)
             
             #self.draw_background(frame)
 
