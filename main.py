@@ -100,6 +100,7 @@ class Main():
 
             if origin_tvec is not None:
                 self.current_state["tvec"] = origin_tvec.tolist()
+            #self.current_state["frame"] = frame
 
             #self.view.render_origin(frame, ret, origin_rvec, origin_tvec)
 
