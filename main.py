@@ -12,6 +12,9 @@ from camera import Camera
 from frame_analyser import Frame_Analyser
 import numpy as np
 from view import View
+import pygame
+from PIL import Image
+import base64
 
 class Main():
 
@@ -96,13 +99,19 @@ class Main():
             frame = self.cam.current_frame
             ret = self.cam.successful_read
 
+            # Encode frame to Base64
+            bg = cv2.imencode(".jpg", frame)
+            bg = base64.b64encode(bg[1])
+            bg = bg.decode("utf-8")
+
+            # Calc origin
             origin_rvec, origin_tvec = self.frame_analyser.find_origin_for_frame(frame, self.relative_frame_data)
 
+            # Send through websocket
             if origin_tvec is not None:
                 self.current_state["tvec"] = origin_tvec.tolist()
-            #self.current_state["frame"] = frame
-
-            #self.view.render_origin(frame, ret, origin_rvec, origin_tvec)
+                self.current_state["rvec"] = origin_rvec.tolist()
+            self.current_state["frame"] = bg
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.cam.release_camera()

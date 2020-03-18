@@ -1,6 +1,14 @@
 import asyncio
 import websockets
 import json
+import base64
+import numpy as np
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 class Websocket:
   def __init__(self, state):
@@ -8,7 +16,7 @@ class Websocket:
     self.clients = set()
 
   def state_event(self):
-    return json.dumps(self.state)
+    return json.dumps(self.state, cls=NumpyEncoder)
 
   async def notify_state(self):
     if self.clients:

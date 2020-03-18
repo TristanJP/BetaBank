@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Spotted</title>
+    <title>BetaBank</title>
     <!-- <link rel="shortcut icon" href="favicon.png" /> -->
     <style>
       body { margin: 0; }
@@ -16,6 +16,7 @@
 
       let x = 1280
       let y = 720
+      var img = new Image();
       var scene = new THREE.Scene();
       var renderer = new THREE.WebGLRenderer({ alpha: true });
       renderer.setClearAlpha(0.0);
@@ -67,11 +68,13 @@
         point.position.x = state.tvec[0] * -10
         point.position.y = state.tvec[1] * -10
         point.position.z = state.tvec[2] * 10
-        console.log('Update state called')
+        img.src = "data:image/jpg;base64," + state.frame;
+        //console.log(state.frame)
+        //console.log('Update state called')
 
-        loader.load('test33.jpg' , function(texture)
+        loader.load(img.src  , function(texture)
                   {
-                    console.log(texture)
+                    //console.log(texture)
                   scene.background = texture;  
                   });
       }
