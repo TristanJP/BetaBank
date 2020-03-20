@@ -54,6 +54,11 @@ class Frame_Analyser:
         
         return frame_data
 
+    def get_scale(self, relative_frame_data, real_size=5.5):
+        relative_tvecs = relative_frame_data[5]["relative_tvec"]
+        dist = ((relative_tvecs[0])**2 + (relative_tvecs[1])**2 + (relative_tvecs[2])**2)**(0.5)
+        return dist/real_size
+
     def center_of_mass_corners(self, frame_data):
         total_x = 0
         total_y = 0

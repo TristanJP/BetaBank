@@ -93,11 +93,18 @@ class Main():
         self.relative_frame_data = self.frame_analyser.get_relative_dict(frame_data, origin_marker_id)
         return self.relative_frame_data
 
+    def get_undistorted_image(self, frame) -> list:
+        img_undist = cv2.undistort(frame, self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], None)
+        return img_undist
+
     def run_magic(self, marker_id):
         print("\nRunning Realtime")
+        i = 0
         while True:
             frame = self.cam.current_frame
             ret = self.cam.successful_read
+
+            frame = self.get_undistorted_image(frame)
 
             # Encode frame to Base64
             bg = cv2.imencode(".jpg", frame)
@@ -107,10 +114,16 @@ class Main():
             # Calc origin
             origin_rvec, origin_tvec = self.frame_analyser.find_origin_for_frame(frame, self.relative_frame_data)
 
+            if False:
+                # Calcs distance of markers from camera
+                if origin_tvec is not None:
+                    print(origin_tvec[2]/self.scale)
+
             # Send through websocket
             if origin_tvec is not None:
                 self.current_state["tvec"] = origin_tvec.tolist()
                 self.current_state["rvec"] = origin_rvec.tolist()
+                self.current_state["scale"] = self.scale*100
             self.current_state["frame"] = bg
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -191,6 +204,10 @@ if __name__ == "__main__":
     ### Initial Frame Data
     main.calculate_relative_dict("test_images/capture_0.png" , marker_id)
     #main.calculate_relative_dict("test_videos/test2.avi", marker_id)
+
+    main.scale = main.frame_analyser.get_scale(main.relative_frame_data)
+
+    print(main.scale)
 
     ### Run
     #main.run_realtime_relative(marker_id)
