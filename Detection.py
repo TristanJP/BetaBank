@@ -1,7 +1,9 @@
 import cv2
 from cv2 import aruco
 from camera import Camera
+import numpy as np
 import copy
+import math
 
 class Detection():
 
@@ -35,9 +37,10 @@ class Detection():
         frame_data_ids = {}
         if ids is not None:
             while i < len(ids):
+                #corrected_rvecs = self.correct_flipping(rvecs[i], tvecs[i])
                 marker_corner = tuple(corners[i].ravel())
                 frame_data_body["corners"] = marker_corner
-                frame_data_body["marker_rvecs"] = rvecs[i]
+                frame_data_body["marker_rvecs"] = rvecs[i]#corrected_rvecs
                 frame_data_body["marker_tvecs"] = tvecs[i]
 
                 frame_data_ids[ids[i][0]] = frame_data_body.copy()
@@ -47,3 +50,31 @@ class Detection():
         frame_data["ids"] = frame_data_ids
         frame_data["objPoints"] = objPoints
         return frame_data
+
+    def correct_flipping(self, rvecs, tvecs):
+        T = tvecs[0,0]
+        R = cv2.Rodrigues(rvecs[0])
+        # Unrelated -- makes Y the up axis, Z forward
+        R = R @ np.array([
+            [1, 0, 0],
+            [0, 0, 1],
+            [0,-1, 0],
+        ])
+        if 0 < R[1,1] < 1:
+            # If it gets here, the pose is flipped.
+
+            # Flip the axes. E.g., Y axis becomes [-y0, -y1, y2].
+            R *= np.array([
+                [ 1, -1,  1],
+                [ 1, -1,  1],
+                [-1,  1, -1],
+            ])
+            
+            # Fixup: rotate along the plane spanned by camera's forward (Z) axis and vector to marker's position
+            forward = np.array([0, 0, 1])
+            tnorm = T / np.linalg.norm(T)
+            axis = np.cross(tnorm, forward)
+            angle = -2*math.acos(tnorm @ forward)
+            R = cv2.Rodrigues(angle * axis)[0] @ R
+            new_rvecs, _ = cv2.Rodrigues(R)
+            return new_rvecs

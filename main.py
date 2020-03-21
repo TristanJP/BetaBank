@@ -15,6 +15,7 @@ from view import View
 import pygame
 from PIL import Image
 import base64
+import math
 
 class Main():
 
@@ -97,9 +98,41 @@ class Main():
         img_undist = cv2.undistort(frame, self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], None)
         return img_undist
 
+    # Checks if a matrix is a valid rotation matrix.
+    def isRotationMatrix(self, R):
+        Rt = np.transpose(R)
+        shouldBeIdentity = np.dot(Rt, R)
+        I = np.identity(3, dtype = R.dtype)
+        n = np.linalg.norm(I - shouldBeIdentity)
+        return n < 1e-6
+
+
+    # Calculates rotation matrix to euler angles
+    # The result is the same as MATLAB except the order
+    # of the euler angles ( x and z are swapped ).
+    def rotationMatrixToEulerAngles(self, R):
+
+        assert(self.isRotationMatrix(R))
+        
+        sy = math.sqrt(R[0,0] * R[0,0] +  R[1,0] * R[1,0])
+        
+        singular = sy < 1e-6
+
+        if  not singular :
+            x = math.atan2(R[2,1] , R[2,2])
+            y = math.atan2(-R[2,0], sy)
+            z = math.atan2(R[1,0], R[0,0])
+        else :
+            x = math.atan2(-R[1,2], R[1,1])
+            y = math.atan2(-R[2,0], sy)
+            z = 0
+
+        return np.array([x, y, z])
+
     def run_magic(self, marker_id):
         print("\nRunning Realtime")
         i = 0
+        prev_vect = [0,0,0]
         while True:
             frame = self.cam.current_frame
             ret = self.cam.successful_read
@@ -121,8 +154,19 @@ class Main():
 
             # Send through websocket
             if origin_tvec is not None:
-                self.current_state["tvec"] = origin_tvec.tolist()
-                self.current_state["rvec"] = origin_rvec.tolist()
+                R, _ = cv2.Rodrigues(origin_rvec)
+                origin_rvec = self.rotationMatrixToEulerAngles(R)
+
+                cam_rvecs = origin_rvec[:]
+                # print(cam_rvecs)
+                # if (prev_vect[0] / cam_rvecs[0] < 0):
+                #     cam_rvecs[0] *= -1
+                #     #cam_rvecs[1] *= -1
+                #     print(f"-> {cam_rvecs}")
+                # prev_vect = cam_rvecs
+
+                self.current_state["tvec"] = origin_tvec
+                self.current_state["rvec"] = cam_rvecs
                 self.current_state["scale"] = self.scale*100
             self.current_state["frame"] = bg
 
