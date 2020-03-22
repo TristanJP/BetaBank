@@ -16,5 +16,5 @@ for i in range(1, nx*ny+1):
     plt.imshow(img, cmap = mpl.cm.gray, interpolation = "nearest")
     ax.axis("off")
 
-plt.savefig("_data/markers.pdf")
+plt.savefig("images/markers.pdf")
 plt.show()

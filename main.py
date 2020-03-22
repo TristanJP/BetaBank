@@ -25,7 +25,7 @@ class Main():
     current_state = dict()
 
     def __init__(self):
-        print("running\n")
+        print("Starting...\n")
         self.cam = Camera()
         self.calibration_data = self.cam.get_calibration_data()
         self.cam.start()
@@ -33,6 +33,7 @@ class Main():
         self.detection = Detection(self.calibration_data)
         self.frame_analyser = Frame_Analyser(self.calibration_data)
         self.view = View(self.calibration_data)
+
 
     def start(self):
         ui = threading.Thread(target=self.start_ui, daemon=True)
@@ -132,43 +133,88 @@ class Main():
     def run_magic(self, marker_id):
         print("\nRunning Realtime")
         i = 0
-        prev_vect = [0,0,0]
-        while True:
-            frame = self.cam.current_frame
-            ret = self.cam.successful_read
+        
+        #cv2.imshow("test", frame)
 
-            frame = self.get_undistorted_image(frame)
+        t_frame_data = self.get_frame_data("test_images/capture_0.png")
+
+        while True:
+
+            # GETTING FRAMES
+            # frame = self.cam.current_frame
+            ret = self.cam.successful_read
+            frame = self.cam.current_frame
+            #frame = cv2.imread("test_images/capture_0.png")
+
+            # GETTING DATA
+            if ret:
+                frame_data = self.frame_analyser.anaylse_frame(frame)
+            
+
+            # GETTING UNDISTORTED IMAGE
+                frame_undist = self.get_undistorted_image(frame)
+            
+            
+            # RATIO STUFF
+            if frame_data["ids"] is not None:
+                if 5 in frame_data["ids"] and 1 in frame_data["ids"]:
+                    rel_pix_dataX = frame_data["ids"][5]["corners"][0] - frame_data["ids"][1]["corners"][0]
+                    rel_pix_dataY = frame_data["ids"][5]["corners"][1] - frame_data["ids"][1]["corners"][1]
+                    ratio1 = ((rel_pix_dataX)**2 + (rel_pix_dataY)**2)**(0.5)
+
+                    Trel_pix_dataX = t_frame_data["ids"][5]["corners"][0] - t_frame_data["ids"][1]["corners"][0]
+                    Trel_pix_dataY = t_frame_data["ids"][5]["corners"][1] - t_frame_data["ids"][1]["corners"][1]
+
+                    ratio2 = ((Trel_pix_dataX)**2 + (Trel_pix_dataY)**2)**(0.5)
+
+                    ratio = ratio1 / ratio2
+
+                    self.current_state["ratio"] = ratio
+
+                # rel_frame_data = self.frame_analyser.get_relative_dict(frame_data, 1)
+
+                # s1 = rel_frame_data[5]["relative_tvec"]
+                # s2 = self.relative_frame_data[5]["relative_tvec"]
+
+                # tratio1 = ((s1[0])**2 + (s1[1])**2 + (s1[2])**2)**(0.5)
+                # tratio2 = ((s2[0])**2 + (s2[1])**2 + (s2[2])**2)**(0.5)
+
+                # tratio = tratio1 / tratio2
+            
+
 
             # Encode frame to Base64
-            bg = cv2.imencode(".jpg", frame)
+            bg = cv2.imencode(".jpg", frame_undist)
             bg = base64.b64encode(bg[1])
             bg = bg.decode("utf-8")
 
             # Calc origin
             origin_rvec, origin_tvec = self.frame_analyser.find_origin_for_frame(frame, self.relative_frame_data)
 
+            #frame = self.get_undistorted_image(frame)
+
             if False:
                 # Calcs distance of markers from camera
                 if origin_tvec is not None:
                     print(origin_tvec[2]/self.scale)
+
 
             # Send through websocket
             if origin_tvec is not None:
                 R, _ = cv2.Rodrigues(origin_rvec)
                 origin_rvec = self.rotationMatrixToEulerAngles(R)
 
-                cam_rvecs = origin_rvec[:]
-                # print(cam_rvecs)
-                # if (prev_vect[0] / cam_rvecs[0] < 0):
-                #     cam_rvecs[0] *= -1
-                #     #cam_rvecs[1] *= -1
-                #     print(f"-> {cam_rvecs}")
-                # prev_vect = cam_rvecs
+                R2, _ = cv2.Rodrigues(self.pic_rvec)
+                self.pic_rvec = self.rotationMatrixToEulerAngles(R2)
 
-                self.current_state["tvec"] = origin_tvec
-                self.current_state["rvec"] = cam_rvecs
+                #cam_rvecs = origin_rvec[:]     
+
+                self.current_state["tvec"] = origin_tvec.flatten()
+                self.current_state["rvec"] = origin_rvec.flatten()
                 self.current_state["scale"] = self.scale*100
             self.current_state["frame"] = bg
+            self.current_state["picT"] = self.pic_tvec.flatten()
+            self.current_state["picR"] = self.pic_rvec.flatten()                
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.cam.release_camera()
@@ -251,7 +297,10 @@ if __name__ == "__main__":
 
     main.scale = main.frame_analyser.get_scale(main.relative_frame_data)
 
-    print(main.scale)
+    temp = cv2.imread("test_images/capture_0.png")
+    main.pic_rvec, main.pic_tvec = main.frame_analyser.find_origin_for_frame(temp, main.relative_frame_data)
+
+    #print(main.scale)
 
     ### Run
     #main.run_realtime_relative(marker_id)

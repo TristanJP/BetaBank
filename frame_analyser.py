@@ -155,16 +155,25 @@ class Frame_Analyser:
 
     def get_average_of_vectors(self, combined_frame_data):
         if len(combined_frame_data) >= 1:
+            prev_vect = [0,0,0]
             sum_rvec = 0.0
             sum_tvec = 0.0
+            #print("\n======\n")
             for marker_id in combined_frame_data:
                 rvec = combined_frame_data[marker_id]["combined_rvec"]
                 tvec = combined_frame_data[marker_id]["combined_tvec"]
+                #print(rvec)
+                if (prev_vect[0] / rvec[0] < 0 and prev_vect[1] / rvec[1] < 0):
+                    rvec[0] *= -1
+                    rvec[1] *= -1
+                    rvec[2] *= -1
+                    #print(f"-> {rvec}")
+                prev_vect = rvec
                 sum_rvec += rvec
                 sum_tvec += tvec
 
             size = len(combined_frame_data)
-            average_rvec = combined_frame_data[next(iter(combined_frame_data))]["combined_rvec"]
+            average_rvec = sum_rvec/size#combined_frame_data[next(iter(combined_frame_data))]["combined_rvec"]
             average_tvec = sum_tvec/size
 
             return average_rvec, average_tvec

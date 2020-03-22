@@ -16,12 +16,13 @@
 
       let windowX = 1280//window.innerWidth
       let windowY = 720//window.innerHeight
+      let didRatio = true;
       var img = new Image();
       var scene = new THREE.Scene();
       var renderer = new THREE.WebGLRenderer();
       var origin = new THREE.Vector3(0,0,0);
       renderer.setClearAlpha(0.0);
-      var camera = new THREE.PerspectiveCamera( 45, windowX / windowY, 0.1, 1000 );
+      var camera = new THREE.PerspectiveCamera( 45, windowX / windowY, 0.01, 1000 );
       var controls = new THREE.OrbitControls(camera, renderer.domElement);
 
       //Load background texture
@@ -58,8 +59,12 @@
         //console.log(state)
 
         if (point == null) {
-          var geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
-          var texture = THREE.ImageUtils.loadTexture('test_text.jpg', {}, function() {
+          let win_scale = 1;
+          let temp_scale = 2.848243519466174;
+          let temp_scale2 = 0.35214222251510563;
+          let temp_scale3 = 1;
+          var geometry = new THREE.BoxGeometry( 1.28 * temp_scale3 * 1, 0.72 * temp_scale3 * 1, 0.01 );
+          var texture = THREE.ImageUtils.loadTexture('capture_0.png', {}, function() {
             renderer.render(scene, camera);
           })
           var material = new THREE.MeshBasicMaterial({map: texture, transparent: true })
@@ -68,19 +73,42 @@
           camera.position = origin;
           //point.lookAt(origin);
         }
+
+        if (false) {
+          point.scale.x = 1/(state.tvec[2] / state.scale) 
+          point.scale.y = 1/(state.tvec[2] / state.scale)
+          
+          console.log(1/(state.tvec[2] / state.scale))
+        }
+
+        if (false) {
+          point.scale.x = state.ratio
+          point.scale.y = state.ratio
+          //didRatio = true;
+          //console.log(didRatio)
+          
+        }
         
         if (state.tvec) {
-          point.position.x = state.tvec[0] / -state.scale;
-          point.position.y = state.tvec[1] / -state.scale;
-          point.position.z = state.tvec[2] / state.scale;
-
+          point.position.x = (state.tvec[0] - state.picT[0]) / -state.scale;
+          point.position.y = (state.tvec[1] - state.picT[1]) / -state.scale;
+          if (true) {
+            point.position.z = (state.tvec[2] + state.picT[2]) / state.scale;
+          }
+          else {
+            point.position.z = 1//0.1;
+          }
+          
           // camera.lookAt(point);
           
-          point.rotation.x = -(state.rvec[1]);
-          point.rotation.y = (state.rvec[0]);
-          point.rotation.z = -(state.rvec[2] + 1.570796);
-          console.log(state.rvec)
+          //point.rotation.x = -(state.rvec[1]);
+          //point.rotation.y = (state.rvec[0]);
+          //point.rotation.z = -(state.rvec[2] + 1.570796);
+          //console.log(state.rvec)
         }
+
+
+        console.log(state)
 
         img.src = "data:image/jpg;base64," + state.frame;
         // console.log(state.tvec[0] / -state.scale)
