@@ -27,12 +27,12 @@ class Capture:
 
             cv2.imshow('frame', frame_markers)
 
-            if cv2.waitKey(1) & 0xFF == ord(' '):
+            if cv2.waitKey(10) & 0xFF == ord(' '):
                 
                 cv2.imwrite(f"{image_folder}/capture_{i}.png", gray)
                 i += 1
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(10) & 0xFF == ord('q'):
                 self.cam.release_camera()
                 break
     
@@ -70,6 +70,9 @@ if __name__ == "__main__":
     
     cap = Capture()
 
-    cap.take_pictures(False, "test_images")
+    # Calibration
+    #cap.take_pictures(False, "calibration_images_1920x1080", cv2.aruco.DICT_4X4_50)
 
-    #cap.take_video(False, "test_videos", "test0.avi")
+    cap.take_pictures(False, "test_images_1920x1080")
+
+    #cap.take_video(False, "test_videos", "test4.avi")

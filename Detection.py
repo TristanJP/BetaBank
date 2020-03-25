@@ -40,7 +40,7 @@ class Detection():
                 #corrected_rvecs = self.correct_flipping(rvecs[i], tvecs[i])
                 marker_corner = tuple(corners[i].ravel())
                 frame_data_body["corners"] = marker_corner
-                frame_data_body["marker_rvecs"] = rvecs[i]#corrected_rvecs
+                frame_data_body["marker_rvecs"] = rvecs[i]#corrected_rvecs[:]
                 frame_data_body["marker_tvecs"] = tvecs[i]
 
                 frame_data_ids[ids[i][0]] = frame_data_body.copy()
@@ -52,8 +52,9 @@ class Detection():
         return frame_data
 
     def correct_flipping(self, rvecs, tvecs):
-        T = tvecs[0,0]
-        R = cv2.Rodrigues(rvecs[0])
+        T = tvecs[0]
+        rvec = rvecs[0].reshape((3, 1))
+        R, _ = cv2.Rodrigues(rvec)
         # Unrelated -- makes Y the up axis, Z forward
         R = R @ np.array([
             [1, 0, 0],
@@ -78,3 +79,5 @@ class Detection():
             R = cv2.Rodrigues(angle * axis)[0] @ R
             new_rvecs, _ = cv2.Rodrigues(R)
             return new_rvecs
+        else:
+            return rvecs

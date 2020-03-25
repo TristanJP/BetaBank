@@ -15,7 +15,7 @@ class Calibrate:
 
     calibration_data: dict
 
-    def __init__(self, path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250):
+    def __init__(self, path="calibration_images_1920x1080", search_aruco_dict=cv2.aruco.DICT_6X6_250):
         self.CALIBRATION_IMAGE_PATH = path
         self.search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
 
@@ -45,7 +45,6 @@ class Calibrate:
         fnames = glob(f"{self.CALIBRATION_IMAGE_PATH}/*.png")
         #fnames = [f for f in glob("calibration_images/*.png")]
         return fnames
-        print(fnames)
 
 
     def read_chessboards(self):
@@ -220,7 +219,7 @@ class Calibrate:
 if __name__ == "__main__":
     
     # Calibrate based on images
-    cal = Calibrate(path="calibration_images", search_aruco_dict=cv2.aruco.DICT_6X6_250)
+    cal = Calibrate(path="calibration_images_1920x1080", search_aruco_dict=cv2.aruco.DICT_6X6_250)
 
     cal.calibrate_camera()
 
