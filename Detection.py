@@ -51,6 +51,7 @@ class Detection():
         frame_data["objPoints"] = objPoints
         return frame_data
 
+    # REMOVE THIS
     def correct_flipping(self, rvecs, tvecs):
         T = tvecs[0]
         rvec = rvecs[0].reshape((3, 1))

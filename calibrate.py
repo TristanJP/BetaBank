@@ -31,21 +31,21 @@ class Calibrate:
         #Dump the calibration board to a file
         cv2.imwrite('images/charuco.png',img)
 
+    # OLD
     def capture_camera(self):
         cap = cv2.VideoCapture(0)
         cap.set(3, 1280)
         cap.set(4, 720)
         return cap
 
+    # OLD
     def release_camera(self, cap):
         cap.release()
         cv2.destroyAllWindows()
 
     def get_calibration_images(self):
         fnames = glob(f"{self.CALIBRATION_IMAGE_PATH}/*.png")
-        #fnames = [f for f in glob("calibration_images/*.png")]
         return fnames
-
 
     def read_chessboards(self):
         # Charuco base pose estimation.
@@ -183,6 +183,7 @@ class Calibrate:
         plt.grid()
         plt.show()
 
+    # OLD
     def show_pose(self):
         cap = self.capture_camera()
 

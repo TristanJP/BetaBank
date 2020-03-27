@@ -106,7 +106,6 @@ class Main():
         n = np.linalg.norm(I - shouldBeIdentity)
         return n < 1e-6
 
-
     # Calculates rotation matrix to euler angles
     # The result is the same as MATLAB except the order
     # of the euler angles ( x and z are swapped ).
@@ -129,7 +128,12 @@ class Main():
 
         return np.array([x, y, z])
 
+    # RUN ZONE
+
+    # BOARD
     def run_board(self):
+        self.calculate_relative_dict(self.v_path, 1)
+        self.scale = main.frame_analyser.get_scale(self.relative_frame_data)
 
         while True:
             # GETTING FRAMES
@@ -149,19 +153,21 @@ class Main():
                 self.current_state["rvec"] = origin_rvecs
 
                 self.current_state["use_board"] = True
+                self.current_state["scale"] = self.scale*100
 
                 bg = cv2.imencode(".jpg", frame)
                 bg = base64.b64encode(bg[1])
                 bg = bg.decode("utf-8")
                 self.current_state["frame"] = bg
 
+    # SINGLE MARKERS
     def run_magic(self, marker_id):
         print("\nRunning Realtime")
-        i = 0
-        
-        #cv2.imshow("test", frame)
 
         v_frame_data = self.get_frame_data(self.v_path)
+
+        self.calculate_relative_dict(self.v_path, 1)
+        self.scale = main.frame_analyser.get_scale(self.relative_frame_data)
 
         #cap = cv2.VideoCapture("test_videos/test4.avi")
         #delay = int((1/cap.get(5))*(1000/2))
@@ -205,29 +211,30 @@ class Main():
                 bg = bg.decode("utf-8")
                 self.current_state["frame"] = bg
 
+                # Encode video frame to Base64
                 if v_frame is not None:
                     vf = cv2.imencode(".jpg", v_frame)
                     vf = base64.b64encode(vf[1])
                     vf = vf.decode("utf-8")
                     self.current_state["v_frame"] = vf
             
-            
+                # OLD
                 # RATIO STUFF
-                if False:
-                    if frame_data["ids"] is not None:
-                        if 5 in frame_data["ids"] and 1 in frame_data["ids"] and 5 in v_frame_data["ids"] and 1 in v_frame_data["ids"]:
-                            rel_pix_dataX = frame_data["ids"][5]["corners"][0] - frame_data["ids"][1]["corners"][0]
-                            rel_pix_dataY = frame_data["ids"][5]["corners"][1] - frame_data["ids"][1]["corners"][1]
-                            ratio1 = ((rel_pix_dataX)**2 + (rel_pix_dataY)**2)**(0.5)
+                # if False:
+                #     if frame_data["ids"] is not None:
+                #         if 5 in frame_data["ids"] and 1 in frame_data["ids"] and 5 in v_frame_data["ids"] and 1 in v_frame_data["ids"]:
+                #             rel_pix_dataX = frame_data["ids"][5]["corners"][0] - frame_data["ids"][1]["corners"][0]
+                #             rel_pix_dataY = frame_data["ids"][5]["corners"][1] - frame_data["ids"][1]["corners"][1]
+                #             ratio1 = ((rel_pix_dataX)**2 + (rel_pix_dataY)**2)**(0.5)
 
-                            Trel_pix_dataX = v_frame_data["ids"][5]["corners"][0] - v_frame_data["ids"][1]["corners"][0]
-                            Trel_pix_dataY = v_frame_data["ids"][5]["corners"][1] - v_frame_data["ids"][1]["corners"][1]
+                #             Trel_pix_dataX = v_frame_data["ids"][5]["corners"][0] - v_frame_data["ids"][1]["corners"][0]
+                #             Trel_pix_dataY = v_frame_data["ids"][5]["corners"][1] - v_frame_data["ids"][1]["corners"][1]
 
-                            ratio2 = ((Trel_pix_dataX)**2 + (Trel_pix_dataY)**2)**(0.5)
+                #             ratio2 = ((Trel_pix_dataX)**2 + (Trel_pix_dataY)**2)**(0.5)
 
-                            ratio = ratio1 / ratio2
+                #             ratio = ratio1 / ratio2
 
-                            self.current_state["ratio"] = ratio
+                #             self.current_state["ratio"] = ratio
 
                     # rel_frame_data = self.frame_analyser.get_relative_dict(frame_data, 1)
 
@@ -252,33 +259,30 @@ class Main():
                     origin_rvec = self.rotationMatrixToEulerAngles(R)
 
                     R2, _ = cv2.Rodrigues(v_origin_rvec)
-                    v_origin_rvec = self.rotationMatrixToEulerAngles(R2)
-
-                    #cam_rvecs = origin_rvec[:]
+                    v_origin_rvec = self.rotationMatrixToEulerAngles(R2)              
                     
-
-                    # AVERAGE ROTATION ACROSS FRAMES (avoid flickering)
                     origin_rvec = origin_rvec.flatten()
                     v_origin_rvec =  v_origin_rvec.flatten()
 
+                    # OLD
+                    # AVERAGE ROTATION ACROSS FRAMES (avoid flickering)
+                    # if False:
+                    #     # Ignore first frame as nothing to compare with
+                    #     if prev_rotation1 is None:
+                    #         prev_rotation1 = origin_rvec[:]
+                    #     elif prev_rotation2 is None:
+                    #         prev_rotation2 = prev_rotation1[:]
+                    #         prev_rotation1 = origin_rvec[:]
+                    #     else:
+                    #         if (origin_rvec[0] / prev_rotation1[0] < 0  and origin_rvec[1] / prev_rotation1[1] < 0):
+                    #             origin_rvec[0] *= -1
+                    #             origin_rvec[1] *= -1
 
-                    # Ignore first frame as nothing to compare with
-                    if False:
-                        if prev_rotation1 is None:
-                            prev_rotation1 = origin_rvec[:]
-                        elif prev_rotation2 is None:
-                            prev_rotation2 = prev_rotation1[:]
-                            prev_rotation1 = origin_rvec[:]
-                        else:
-                            if (origin_rvec[0] / prev_rotation1[0] < 0  and origin_rvec[1] / prev_rotation1[1] < 0):
-                                origin_rvec[0] *= -1
-                                origin_rvec[1] *= -1
-
-                            sum_rvecs = prev_rotation1 + prev_rotation2 + origin_rvec
-                            avg_rvecs = sum_rvecs/3
-                            prev_rotation2 = prev_rotation1[:]
-                            prev_rotation1 = origin_rvec[:]
-                            origin_rvec = avg_rvecs[:]
+                    #         sum_rvecs = prev_rotation1 + prev_rotation2 + origin_rvec
+                    #         avg_rvecs = sum_rvecs/3
+                    #         prev_rotation2 = prev_rotation1[:]
+                    #         prev_rotation1 = origin_rvec[:]
+                    #         origin_rvec = avg_rvecs[:]
 
 
                     self.current_state["tvec"] = origin_tvec.flatten()
@@ -294,6 +298,9 @@ class Main():
 
     def run_realtime_relative(self, marker_id):
         print("\nRunning Realtime")
+
+        self.calculate_relative_dict(self.v_path, 1)
+
         while True:
             frame = self.cam.current_frame
             ret = self.cam.successful_read
@@ -364,42 +371,18 @@ if __name__ == "__main__":
 
     use_board = False
 
+    main.v_path = "test_images_1920x1080/capture_1.png"
 
     if use_board:
         main.run_board()
     else:
         marker_id = 1
 
-        main.v_path = "test_images_1920x1080/capture_0.png"
-
+        # OLD
         ### Initial Frame Data
-        main.calculate_relative_dict(main.v_path, 1)
-        #main.calculate_relative_dict("test_videos/test4.avi", 1)
-        #main.calculate_relative_dict("test_videos/test2.avi", marker_id)
-
-        main.scale = main.frame_analyser.get_scale(main.relative_frame_data)
-
-        #temp = cv2.imread("test_images/capture_8.png")
-        #main.pic_rvec, main.pic_tvec = main.frame_analyser.find_origin_for_frame(temp, main.relative_frame_data)
-
-        #print(main.scale)
+        #main.calculate_relative_dict("test_videos_1280x720/test4.avi", marker_id)
 
         ### Run
-        #main.run_realtime_relative(marker_id)
+        main.run_realtime_relative(marker_id)
         #main.run_video_relative("test_videos/test2.avi", marker_id. False)
-        #main.run_image_opengl_image("test_images/capture_0.png", marker_id)
-        #main.run_realtime_opengl_image(marker_id)
-        main.run_magic(1)
-
-
-
-
-        # main.camera.start()
-
-        # while True:
-        #     if cv2.waitKey(1) & 0xFF == ord('q'):
-        #         break
-            
-        #     cv2.imshow("frame", main.camera.get_current_frame())
-        
-        # main.camera.release_camera()
+        #main.run_magic(1)

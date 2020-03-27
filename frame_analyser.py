@@ -113,14 +113,11 @@ class Frame_Analyser:
 
     def relative_position(self, rvec1, tvec1, rvec2, tvec2):
         # Gets (r/tvecs) relative to each other
-
         rvec1, tvec1 = rvec1.reshape((3, 1)), tvec1.reshape((3, 1))
         rvec2, tvec2 = rvec2.reshape((3, 1)), tvec2.reshape((3, 1))
 
         # Inverse the second marker, the right one in the image
         invRvec, invTvec = self.inverse_perspective(rvec2, tvec2)
-
-        #print(rvec2, tvec2, "\n and \n", self.inverse_perspective(invRvec, invTvec))
 
         data = cv2.composeRT(rvec1, tvec1, invRvec, invTvec)
         composedRvec, composedTvec = data[0], data[1]
@@ -162,22 +159,21 @@ class Frame_Analyser:
             prev_vect = [0,0,0]
             sum_rvec = 0.0
             sum_tvec = 0.0
-            #print("\n======\n")
             for marker_id in combined_frame_data:
                 rvec = combined_frame_data[marker_id]["combined_rvec"]
                 tvec = combined_frame_data[marker_id]["combined_tvec"]
-                #print(rvec)
+
+                # Correct flipping
                 if (prev_vect[0] / rvec[0] < 0 and prev_vect[1] / rvec[1] < 0):
                     rvec[0] *= -1
                     rvec[1] *= -1
                     rvec[2] *= -1
-                    #print(f"-> {rvec}")
                 prev_vect = rvec
                 sum_rvec += rvec
                 sum_tvec += tvec
 
             size = len(combined_frame_data)
-            average_rvec = sum_rvec/size#combined_frame_data[next(iter(combined_frame_data))]["combined_rvec"]
+            average_rvec = sum_rvec/size
             average_tvec = sum_tvec/size
 
             return average_rvec, average_tvec
