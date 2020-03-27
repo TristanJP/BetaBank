@@ -81,3 +81,28 @@ class Detection():
             return new_rvecs
         else:
             return rvecs
+
+    def get_board_in_frame(self, frame, search_aruco_dict):
+        markerLength = 0.04
+        markerSeparation = 0.01
+        markers_w = 7
+        markers_h = 5
+
+        grid_board = cv2.aruco.GridBoard_create(markers_w,
+                                                markers_h,
+                                                markerLength,
+                                                markerSeparation,
+                                                search_aruco_dict)        
+
+        corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, search_aruco_dict)
+
+        if ids is not None and len(ids) > 0:
+            retval, rvecs, tvecs = aruco.estimatePoseBoard(
+                corners, 
+                ids,
+                grid_board,
+                self.calibration_data["cam_mtx"],
+                self.calibration_data["dist_coef"], 0, 0)
+
+            return tvecs, rvecs
+        return np.array([0.0,0.0,0.0]), np.array([0.0,0.0,0.0])

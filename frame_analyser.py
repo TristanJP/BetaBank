@@ -53,6 +53,10 @@ class Frame_Analyser:
         frame_data = self.detection.get_markers_in_frame(frame, aruco_dict)
         
         return frame_data
+    
+    def get_board_origin(self, frame, search_aruco_dict=cv2.aruco.DICT_6X6_250):
+        aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
+        return self.detection.get_board_in_frame(frame, aruco_dict)
 
     def get_scale(self, relative_frame_data, real_size=5.5):
         relative_tvecs = relative_frame_data[5]["relative_tvec"]

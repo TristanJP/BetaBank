@@ -129,6 +129,32 @@ class Main():
 
         return np.array([x, y, z])
 
+    def run_board(self):
+
+        while True:
+            # GETTING FRAMES
+            ret = self.cam.successful_read
+            frame = self.cam.current_frame
+
+            if ret:
+                origin_tvecs, origin_rvecs = self.frame_analyser.get_board_origin(frame)
+
+                R, _ = cv2.Rodrigues(origin_rvecs)
+                origin_rvecs = self.rotationMatrixToEulerAngles(R)
+
+                origin_rvecs = origin_rvecs.flatten()
+                origin_tvecs = origin_tvecs.flatten()
+
+                self.current_state["tvec"] = origin_tvecs
+                self.current_state["rvec"] = origin_rvecs
+
+                self.current_state["use_board"] = True
+
+                bg = cv2.imencode(".jpg", frame)
+                bg = base64.b64encode(bg[1])
+                bg = bg.decode("utf-8")
+                self.current_state["frame"] = bg
+
     def run_magic(self, marker_id):
         print("\nRunning Realtime")
         i = 0
@@ -145,6 +171,7 @@ class Main():
         prev_rotation2 = None
 
         while True:
+            self.current_state["use_board"] = False
 
             # GETTING FRAMES
             # frame = self.cam.current_frame
@@ -334,38 +361,45 @@ if __name__ == "__main__":
 
     main = Main()
     main.start()
-    marker_id = 1
 
-    main.v_path = "test_images_1920x1080/capture_0.png"
-
-    ### Initial Frame Data
-    main.calculate_relative_dict(main.v_path, 1)
-    #main.calculate_relative_dict("test_videos/test4.avi", 1)
-    #main.calculate_relative_dict("test_videos/test2.avi", marker_id)
-
-    main.scale = main.frame_analyser.get_scale(main.relative_frame_data)
-
-    #temp = cv2.imread("test_images/capture_8.png")
-    #main.pic_rvec, main.pic_tvec = main.frame_analyser.find_origin_for_frame(temp, main.relative_frame_data)
-
-    #print(main.scale)
-
-    ### Run
-    #main.run_realtime_relative(marker_id)
-    #main.run_video_relative("test_videos/test2.avi", marker_id. False)
-    #main.run_image_opengl_image("test_images/capture_0.png", marker_id)
-    #main.run_realtime_opengl_image(marker_id)
-    main.run_magic(1)
+    use_board = False
 
 
+    if use_board:
+        main.run_board()
+    else:
+        marker_id = 1
+
+        main.v_path = "test_images_1920x1080/capture_0.png"
+
+        ### Initial Frame Data
+        main.calculate_relative_dict(main.v_path, 1)
+        #main.calculate_relative_dict("test_videos/test4.avi", 1)
+        #main.calculate_relative_dict("test_videos/test2.avi", marker_id)
+
+        main.scale = main.frame_analyser.get_scale(main.relative_frame_data)
+
+        #temp = cv2.imread("test_images/capture_8.png")
+        #main.pic_rvec, main.pic_tvec = main.frame_analyser.find_origin_for_frame(temp, main.relative_frame_data)
+
+        #print(main.scale)
+
+        ### Run
+        #main.run_realtime_relative(marker_id)
+        #main.run_video_relative("test_videos/test2.avi", marker_id. False)
+        #main.run_image_opengl_image("test_images/capture_0.png", marker_id)
+        #main.run_realtime_opengl_image(marker_id)
+        main.run_magic(1)
 
 
-    # main.camera.start()
 
-    # while True:
-    #     if cv2.waitKey(1) & 0xFF == ord('q'):
-    #         break
+
+        # main.camera.start()
+
+        # while True:
+        #     if cv2.waitKey(1) & 0xFF == ord('q'):
+        #         break
+            
+        #     cv2.imshow("frame", main.camera.get_current_frame())
         
-    #     cv2.imshow("frame", main.camera.get_current_frame())
-    
-    # main.camera.release_camera()
+        # main.camera.release_camera()
