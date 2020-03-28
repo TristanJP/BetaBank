@@ -164,17 +164,22 @@ class Main():
     def run_magic(self, marker_id):
         print("\nRunning Realtime")
 
-        v_frame_data = self.get_frame_data(self.v_path)
-
-        self.calculate_relative_dict(self.v_path, 1)
+        # GET RELATIVE INFO AN SCALE
+        self.calculate_relative_dict("test_images_1920x1080/capture_1.png", 1)
         self.scale = main.frame_analyser.get_scale(self.relative_frame_data)
 
-        #cap = cv2.VideoCapture("test_videos/test4.avi")
-        #delay = int((1/cap.get(5))*(1000/2))
+        # GET FRAME OF VIDEO FOR ORIGIN INFO
+        cap = cv2.VideoCapture(self.v_path)
+        v_ret, v_frame = cap.read()
+
         delay = 1
 
-        prev_rotation1 = None
-        prev_rotation2 = None
+        if v_ret:
+            v_origin_rvec, v_origin_tvec = self.frame_analyser.find_origin_for_frame(v_frame, self.relative_frame_data)
+
+        # OLD
+        # prev_rotation1 = None
+        # prev_rotation2 = None
 
         while True:
             self.current_state["use_board"] = False
@@ -184,24 +189,17 @@ class Main():
             ret = self.cam.successful_read
             frame = self.cam.current_frame
             #frame = cv2.imread("test_images/capture_0.png")
-            
-            # Getting video frames
-            #v_ret, v_frame = cap.read()
-            v_frame = cv2.imread(self.v_path)
-            v_ret = True
 
             # GETTING DATA
-            if ret and v_ret:
+            if ret:
                 #frame_undist = self.get_undistorted_image(frame)
                 frame_undist = frame
 
                 frame_data = self.frame_analyser.anaylse_frame(frame)
-                v_frame_data = self.frame_analyser.anaylse_frame(v_frame)
 
                 # Calc origin
                 origin_rvec, origin_tvec = self.frame_analyser.find_origin_for_frame(frame, self.relative_frame_data)
-                v_origin_rvec, v_origin_tvec = self.frame_analyser.find_origin_for_frame(v_frame, self.relative_frame_data)
-
+                
                 # GETTING UNDISTORTED IMAGE
                 #frame_undist = self.get_undistorted_image(frame)
 
@@ -211,12 +209,13 @@ class Main():
                 bg = bg.decode("utf-8")
                 self.current_state["frame"] = bg
 
-                # Encode video frame to Base64
-                if v_frame is not None:
-                    vf = cv2.imencode(".jpg", v_frame)
-                    vf = base64.b64encode(vf[1])
-                    vf = vf.decode("utf-8")
-                    self.current_state["v_frame"] = vf
+                # OLD
+                # # Encode video frame to Base64
+                # if v_frame is not None:
+                #     vf = cv2.imencode(".jpg", v_frame)
+                #     vf = base64.b64encode(vf[1])
+                #     vf = vf.decode("utf-8")
+                #     self.current_state["v_frame"] = vf
             
                 # OLD
                 # RATIO STUFF
@@ -250,19 +249,15 @@ class Main():
                 if False:
                     # Calcs distance of markers from camera
                     if origin_tvec is not None:
-                        print(origin_tvec[2]/self.scale)
+                        print(f"{origin_tvec[0]/self.scale} | {origin_tvec[1]/self.scale} | {origin_tvec[2]/self.scale}")
 
 
                 # Send through websocket
-                if origin_tvec is not None  and v_origin_tvec is not None:
+                if origin_tvec is not None and v_origin_tvec is not None:
                     R, _ = cv2.Rodrigues(origin_rvec)
-                    origin_rvec = self.rotationMatrixToEulerAngles(R)
-
-                    R2, _ = cv2.Rodrigues(v_origin_rvec)
-                    v_origin_rvec = self.rotationMatrixToEulerAngles(R2)              
+                    origin_rvec = self.rotationMatrixToEulerAngles(R)         
                     
                     origin_rvec = origin_rvec.flatten()
-                    v_origin_rvec =  v_origin_rvec.flatten()
 
                     # OLD
                     # AVERAGE ROTATION ACROSS FRAMES (avoid flickering)
@@ -290,7 +285,7 @@ class Main():
                     self.current_state["scale"] = self.scale*100
                 
                     self.current_state["v_origin_tvec"] = v_origin_tvec.flatten()
-                    self.current_state["v_origin_rvec"] = v_origin_rvec               
+                    self.current_state["v_origin_rvec"] = v_origin_rvec              
 
             if cv2.waitKey(delay) & 0xFF == ord('q'):
                 self.cam.release_camera()
@@ -371,7 +366,7 @@ if __name__ == "__main__":
 
     use_board = False
 
-    main.v_path = "test_images_1920x1080/capture_1.png"
+    main.v_path = "test_videos_1920x1080/test1.avi"#"test_images_1920x1080/capture_1.png"
 
     if use_board:
         main.run_board()
@@ -383,6 +378,6 @@ if __name__ == "__main__":
         #main.calculate_relative_dict("test_videos_1280x720/test4.avi", marker_id)
 
         ### Run
-        main.run_realtime_relative(marker_id)
-        #main.run_video_relative("test_videos/test2.avi", marker_id. False)
-        #main.run_magic(1)
+        #main.run_realtime_relative(marker_id)
+        #main.run_video_relative("test_videos_1280x720/test2.avi", marker_id. False)
+        main.run_magic(1)

@@ -73,6 +73,6 @@ if __name__ == "__main__":
     # Calibration
     #cap.take_pictures(False, "calibration_images_1920x1080", cv2.aruco.DICT_4X4_50)
 
-    cap.take_pictures(False, "test_images_1920x1080")
+    #cap.take_pictures(False, "test_images_1920x1080")
 
-    #cap.take_video(False, "test_videos", "test4.avi")
+    cap.take_video(False, "test_videos_1920x1080", "test1.avi")
