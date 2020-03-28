@@ -41,7 +41,6 @@ class Capture:
         out = cv2.VideoWriter(f"{video_folder}/{filename}",cv2.VideoWriter_fourcc('M','J','P','G'), int(self.cam.video_capture.get(5)), (int(self.cam.video_capture.get(3)), int(self.cam.video_capture.get(4))))
 
         search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
-        i = 0
 
         while True:
             # Capture frame-by-frame
@@ -75,4 +74,4 @@ if __name__ == "__main__":
 
     #cap.take_pictures(False, "test_images_1920x1080")
 
-    cap.take_video(False, "test_videos_1920x1080", "test1.avi")
+    cap.take_video(False, "test_videos_1920x1080", "test2.avi")

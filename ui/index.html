@@ -18,11 +18,7 @@
       let windowY = 1080//window.innerHeight
 
       var img = new Image();
-      var video = document.createElement( 'video' );
-      video.src = "test1.avi";
-      video.load();
-      video.play();
-      var texture = new THREE.VideoTexture( video );
+      
 
       var scene = new THREE.Scene();
       var renderer = new THREE.WebGLRenderer();
@@ -110,16 +106,28 @@
                     });
 
         }
+
+        // DONT USE BOARD ======================================
+
         else {
 
           if (point == null) {
             let win_scale = 1;
-            let temp_scale3 = 0.02//1.85;
-            var geometry = new THREE.BoxGeometry( 1.92 * temp_scale3 * 1, 1.08 * temp_scale3 * 1, 0.01 );
-            // var texture = THREE.VideoTexture('capture_10L.png', {}, function() {
-            //   renderer.render(scene, camera);
-            // })
+            let temp_scale = 0.2//1.85;
+            var geometry = new THREE.BoxGeometry( 1.92 * temp_scale * 1, 1.08 * temp_scale * 1, 0.01 );
+
+            var video = document.createElement( 'video' );
+            video.src = "test1.webm";
+            video.load();
+            video.autoplay = true;
+            video.muted = "muted";
+            video.loop = true;
+            const texture = new THREE.VideoTexture( video );
+            console.log(texture)
+            video.play();
+
             var material = new THREE.MeshBasicMaterial({map: texture, transparent: true })
+
             point = new THREE.Mesh( geometry, material );
             scene.add( point );
             camera.position = origin;
