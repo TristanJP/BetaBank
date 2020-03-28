@@ -113,7 +113,7 @@
 
           if (point == null) {
             let win_scale = 1;
-            let temp_scale = 0.2//1.85;
+            let temp_scale = 1.2;
             var geometry = new THREE.BoxGeometry( 1.92 * temp_scale * 1, 1.08 * temp_scale * 1, 0.01 );
 
             var video = document.createElement( 'video' );
@@ -146,7 +146,6 @@
           if (false) {
             point.scale.x = state.ratio
             point.scale.y = state.ratio
-            
           }
           
           if (state.tvec && state.v_origin_tvec) {
@@ -161,9 +160,9 @@
             
             // camera.lookAt(point);
 
-            point.rotation.x = 0//-(state.rvec[1]);
-            point.rotation.y = 0//(state.rvec[0]);
-            point.rotation.z = 0//-(state.rvec[2] + (1.570796 * 1));
+            point.rotation.x = -(state.rvec[1]);
+            point.rotation.y = (state.rvec[0]);
+            point.rotation.z = -(state.rvec[2] + (1.570796 * 1));
             //console.log(state.rvec)
           }
 
