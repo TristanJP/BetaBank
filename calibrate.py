@@ -24,13 +24,6 @@ class Calibrate:
             if name in files:
                 self.CALIBRATION_STORED_DATA = os.path.join(root, name)      
 
-    # CREATE CHARUCO BOARD
-    def generate_charuco_board(self):
-        img = self.board.draw((200*3,200*3))
-
-        #Dump the calibration board to a file
-        cv2.imwrite('images/charuco.png',img)
-
     # OLD
     def capture_camera(self):
         cap = cv2.VideoCapture(0)
@@ -113,7 +106,7 @@ class Calibrate:
 
             self.calibration_data = {"ret": ret, "cam_mtx": camera_matrix, "dist_coef": distortion_coefficients, "cam_rvecs": rotation_vectors, "cam_tvecs": translation_vectors}
             self.saveCoefficients(f"{self.CALIBRATION_IMAGE_PATH}/{self.CALIBRATION_IMAGE_PATH}.yaml", camera_matrix, distortion_coefficients)
-            
+
         print("DONE CALIBRATION")
         return self.calibration_data
 
@@ -212,13 +205,13 @@ class Calibrate:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.release_camera(cap)
                 break
-        
+
 
 # =================================
 # Run Calibration
 
 if __name__ == "__main__":
-    
+
     # Calibrate based on images
     cal = Calibrate(path="calibration_images_1920x1080", search_aruco_dict=cv2.aruco.DICT_6X6_250)
 
