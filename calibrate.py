@@ -1,10 +1,8 @@
-import time
 import cv2
 import os
-from cv2 import aruco
 import numpy as np
+from cv2 import aruco
 from glob import glob
-from matplotlib import pyplot as plt
 
 class Calibrate:
     calibrate_aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
