@@ -1,5 +1,6 @@
 /_data/
 /__pycache__/
+/.pytest_cache/
 /.vscode/
 /test_videos_1280x720/
 /test_videos_old/

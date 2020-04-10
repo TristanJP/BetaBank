@@ -99,7 +99,7 @@ class Main():
         return img_undist
 
     # Checks if a matrix is a valid rotation matrix.
-    def isRotationMatrix(self, R):
+    def is_rotation_matrix(self, R):
         Rt = np.transpose(R)
         shouldBeIdentity = np.dot(Rt, R)
         I = np.identity(3, dtype = R.dtype)
@@ -109,12 +109,12 @@ class Main():
     # Calculates rotation matrix to euler angles
     # The result is the same as MATLAB except the order
     # of the euler angles ( x and z are swapped ).
-    def rotationMatrixToEulerAngles(self, R):
+    def rotation_matrix_to_euler_angles(self, R):
 
-        assert(self.isRotationMatrix(R))
-        
+        assert(self.is_rotation_matrix(R))
+
         sy = math.sqrt(R[0,0] * R[0,0] +  R[1,0] * R[1,0])
-        
+
         singular = sy < 1e-6
 
         if  not singular :
@@ -144,7 +144,7 @@ class Main():
                 origin_tvecs, origin_rvecs = self.frame_analyser.get_board_origin(frame)
 
                 R, _ = cv2.Rodrigues(origin_rvecs)
-                origin_rvecs = self.rotationMatrixToEulerAngles(R)
+                origin_rvecs = self.rotation_matrix_to_euler_angles(R)
 
                 origin_rvecs = origin_rvecs.flatten()
                 origin_tvecs = origin_tvecs.flatten()
@@ -199,7 +199,7 @@ class Main():
 
                 # Calc origin
                 origin_rvec, origin_tvec = self.frame_analyser.find_origin_for_frame(frame, self.relative_frame_data)
-                
+
                 # GETTING UNDISTORTED IMAGE
                 #frame_undist = self.get_undistorted_image(frame)
 
@@ -216,7 +216,7 @@ class Main():
                 #     vf = base64.b64encode(vf[1])
                 #     vf = vf.decode("utf-8")
                 #     self.current_state["v_frame"] = vf
-            
+
                 # OLD
                 # RATIO STUFF
                 # if False:
@@ -244,7 +244,7 @@ class Main():
                     # tratio2 = ((s2[0])**2 + (s2[1])**2 + (s2[2])**2)**(0.5)
 
                     # tratio = tratio1 / tratio2
-            
+
 
                 if False:
                     # Calcs distance of markers from camera
@@ -255,8 +255,8 @@ class Main():
                 # Send through websocket
                 if origin_tvec is not None and v_origin_tvec is not None:
                     R, _ = cv2.Rodrigues(origin_rvec)
-                    origin_rvec = self.rotationMatrixToEulerAngles(R)         
-                    
+                    origin_rvec = self.rotation_matrix_to_euler_angles(R)
+
                     origin_rvec = origin_rvec.flatten()
 
                     # OLD
@@ -283,9 +283,9 @@ class Main():
                     self.current_state["tvec"] = origin_tvec.flatten()
                     self.current_state["rvec"] = origin_rvec
                     self.current_state["scale"] = self.scale*100
-                
+
                     self.current_state["v_origin_tvec"] = v_origin_tvec.flatten()
-                    self.current_state["v_origin_rvec"] = v_origin_rvec              
+                    self.current_state["v_origin_rvec"] = v_origin_rvec
 
             if cv2.waitKey(delay) & 0xFF == ord('q'):
                 self.cam.release_camera()
@@ -346,7 +346,7 @@ class Main():
 
     def run_image_opengl_image(self, image_path, marker_id):
         print("\nRunning Image with OpenGL Image")
-        
+
         frame = cv2.imread(image_path)
         ret = True
 
