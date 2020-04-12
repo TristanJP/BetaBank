@@ -24,9 +24,9 @@ class Detection():
         for corner in corners:
             cv2.cornerSubPix(gray_frame, corner, winSize = (3,3), zeroZone = (-1,-1), criteria = criteria)
 
-        size_of_marker =  0.0125 # side length of the marker in meters
+        size_of_marker =  0.045 # side length of the marker in meters
 
-        rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners, 
+        rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners,
                                                                   size_of_marker,
                                                                   self.calibration_data["cam_mtx"],
                                                                   self.calibration_data["dist_coef"])
@@ -51,38 +51,6 @@ class Detection():
         frame_data["objPoints"] = objPoints
         return frame_data
 
-    # REMOVE THIS
-    def correct_flipping(self, rvecs, tvecs):
-        T = tvecs[0]
-        rvec = rvecs[0].reshape((3, 1))
-        R, _ = cv2.Rodrigues(rvec)
-        # Unrelated -- makes Y the up axis, Z forward
-        R = R @ np.array([
-            [1, 0, 0],
-            [0, 0, 1],
-            [0,-1, 0],
-        ])
-        if 0 < R[1,1] < 1:
-            # If it gets here, the pose is flipped.
-
-            # Flip the axes. E.g., Y axis becomes [-y0, -y1, y2].
-            R *= np.array([
-                [ 1, -1,  1],
-                [ 1, -1,  1],
-                [-1,  1, -1],
-            ])
-            
-            # Fixup: rotate along the plane spanned by camera's forward (Z) axis and vector to marker's position
-            forward = np.array([0, 0, 1])
-            tnorm = T / np.linalg.norm(T)
-            axis = np.cross(tnorm, forward)
-            angle = -2*math.acos(tnorm @ forward)
-            R = cv2.Rodrigues(angle * axis)[0] @ R
-            new_rvecs, _ = cv2.Rodrigues(R)
-            return new_rvecs
-        else:
-            return rvecs
-
     def get_board_in_frame(self, frame, search_aruco_dict):
         markerLength = 0.04
         markerSeparation = 0.01
@@ -93,13 +61,13 @@ class Detection():
                                                 markers_h,
                                                 markerLength,
                                                 markerSeparation,
-                                                search_aruco_dict)        
+                                                search_aruco_dict)
 
         corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, search_aruco_dict)
 
         if ids is not None and len(ids) > 0:
             retval, rvecs, tvecs = aruco.estimatePoseBoard(
-                corners, 
+                corners,
                 ids,
                 grid_board,
                 self.calibration_data["cam_mtx"],

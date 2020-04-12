@@ -15,9 +15,8 @@ class Camera:
         if calibration_data is not None:
             self.calibration_data = calibration_data
         else:
-            #print("dont calib")
             self.calibrate()
-            
+
         read = self.video_capture.read()
         self.current_frame = read[1]
         self.successful_read = read[0]
