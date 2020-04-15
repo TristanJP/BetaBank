@@ -17,6 +17,9 @@ class Frame_Analyser:
         self.calibration_data = calibration_data
         self.detection = Detection(self.calibration_data)
 
+    # Returns dictionary of pose for all amrkers in a video.
+    # Works per frame, finds which frame has the most markers detectable and returns
+    # that frames pose data.
     def analyse_video(self, video_path, search_aruco_dict=cv2.aruco.DICT_6X6_250, show=False, total_markers=12):
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
 
@@ -44,21 +47,28 @@ class Frame_Analyser:
                 break
         return largest_frame_data
 
+    # Returns dictionary of pose for all amrkers in view
     def anaylse_frame(self, frame, search_aruco_dict=cv2.aruco.DICT_6X6_250):
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
         frame_data = self.detection.get_markers_in_frame(frame, aruco_dict)
 
         return frame_data
 
+    # Returns the origin marker pose using board based detection
     def get_board_origin(self, frame, search_aruco_dict=cv2.aruco.DICT_6X6_250):
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
         return self.detection.get_board_in_frame(frame, aruco_dict)
 
+    # Used for testing
+    # Gets a scale which can be used to convert between translation vectors and
+    # real-world position relative to the camera (unit = centimetres)
     def get_scale(self, relative_frame_data, real_size=5.5):
         relative_tvecs = relative_frame_data[5]["relative_tvec"]
         dist = ((relative_tvecs[0])**2 + (relative_tvecs[1])**2 + (relative_tvecs[2])**2)**(0.5)
         return dist/real_size
 
+    # Used for testing
+    # Should return position for center of markers
     def center_of_mass_corners(self, frame_data):
         total_x = 0
         total_y = 0
@@ -76,6 +86,8 @@ class Frame_Analyser:
 
         return (average_x, average_y)
 
+    # Used for testing
+    # Should get corners positoin relative to center
     def get_corners_relative_to_center(self, frame_data, center_of_mass):
         relative_vectors = {}
         frame_data_by_id = frame_data["ids"]
@@ -87,19 +99,8 @@ class Frame_Analyser:
 
         return relative_vectors
 
-    def show_position(self, frame_path, position, corners, ids):
-        frame = cv2.imread(frame_path)
-        position = [int(pos) for pos in position]
-        print(f"{position[0]}, {position[1]}")
-        frame_new = cv2.line(frame, (position[0], position[1]), (position[0], position[1]), (65,65,255), 6)
-        if corners is not None:
-            frame_new = aruco.drawDetectedMarkers(frame_new, corners, ids)
-
-        while True:
-            cv2.imshow("frame", frame_new)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
+    # Inverts the perspective of the rotation and translation vectors which are
+    # relative to the camera.
     def inverse_perspective(self, rvec, tvec):
         R, _ = cv2.Rodrigues(rvec)
         R = np.matrix(R).T
@@ -123,6 +124,7 @@ class Frame_Analyser:
 
         return composedRvec, composedTvec
 
+    # Gets a dictionary of pose for all amrkers relative to the origin marker
     def get_relative_dict(self, frame_data, origin_marker_id):
         relative_frame_data = {}
         relative_frame_body = {}
@@ -138,6 +140,10 @@ class Frame_Analyser:
 
         return relative_frame_data
 
+    # Gets a dictionary of estiamted pose for the origin marker.
+    # Effectively combines the relative pose dicitonary with the frame data from the
+    # current frame to calculate where each marker believes the origin marker is
+    # based on it's pose in the world-space.
     def get_combined_dict(self, frame_data, relative_data):
         combined_dict = {}
         combined_body = {}
@@ -150,6 +156,10 @@ class Frame_Analyser:
 
         return combined_dict
 
+    # Averages the rotaiton and translation vectors to get a single value.
+    # Used to get a pose for the origin marker from a dictionary of estimated pose/
+    # Must also correct flipping of rotation vectors due to ambiguity in pose
+    # estimation from solvePnP() method.
     def get_average_of_vectors(self, combined_frame_data):
         if len(combined_frame_data) >= 1:
             prev_vect = [0,0,0]
@@ -176,68 +186,13 @@ class Frame_Analyser:
 
         return None, None
 
+    # Returns the pose of the origin marker based on the current frame and
+    # markers relative position.
     def find_origin_for_frame(self, frame, relative_frame_data):
         rt_frame_data = self.anaylse_frame(frame)
         combined_frame_data = self.get_combined_dict(rt_frame_data, relative_frame_data)
         average_rvec, average_tvec = self.get_average_of_vectors(combined_frame_data)
         return average_rvec, average_tvec
-
-    def test_on_frame(self, frame, relative_dict):
-        # Get frame images etc.
-        frame_path = "test_images/capture_10.png"
-        alt_frame_path = "test_images/capture_14.png"
-        image = cv2.imread(frame_path)
-        alt_image = cv2.imread(alt_frame_path)
-
-        # Get data about frame (tvecs, rvecs, corners)
-        frame_data = self.anaylse_frame(image, cv2.aruco.DICT_6X6_250)
-        alt_frame_data = self.anaylse_frame(alt_image, cv2.aruco.DICT_6X6_250)
-
-        # Get relative t/rvecs for markers to 1st marker
-        relative_frame_data = self.get_relative_dict(frame_data, 1)
-
-        # Combine the new frame data with the relative data
-        combined_frame_data = self.get_combined_dict(alt_frame_data, relative_frame_data)
-
-        average_rvec, average_tvec = self.get_average_of_vectors(combined_frame_data)
-
-        # Get new position based on realtive marker (r/tvecs) and new frame
-        #relative_data = cv2.composeRT(relative_frame_data[2]["relative_rvec"], relative_frame_data[2]["relative_tvec"], alt_frame_data["ids"][2]["marker_rvecs"].T, alt_frame_data["ids"][2]["marker_tvecs"].T)
-
-        # Draw the point
-        self.render(alt_image, self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], average_rvec, average_tvec)
-
-        #average_position = frame_analyser.center_of_mass(frame_data)
-        #frame_analyser.show_position(frame_path, average_position, None, None)
-        #relative_dict = frame_analyser.get_markers_position_relative_to_center(frame_data, average_position)
-
-    def test_on_video(self):
-        name = "test_videos/test60.avi"
-        frame_data = self.analyse_video(name)
-
-        chosen_marker = 1
-        relative_frame_data = self.get_relative_dict(frame_data, chosen_marker)
-        self.render_video_relative(self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], relative_frame_data, name)
-
-    def test_realtime(self):
-        if False:
-            frame_path = "test_images/capture_10.png"
-            image = cv2.imread(frame_path)
-            frame_data = self.anaylse_frame(image, cv2.aruco.DICT_6X6_250)
-        elif False:
-            name = "test_videos/test40"
-            frame_data = self.analyse_video(f"{name}.avi")
-            np.save(f"{name}.npy", frame_data)
-        else:
-            name = "test_videos/test40"
-            frame_data = np.load(f"{name}.npy",allow_pickle='TRUE').item()
-
-        chosen_marker = 1
-        relative_frame_data = self.get_relative_dict(frame_data, chosen_marker)
-
-        #self.render_realtime_by_marker_id(self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], chosen_marker)
-        self.render_realtime_relative(self.calibration_data["cam_mtx"], self.calibration_data["dist_coef"], relative_frame_data)
-
 
 if __name__ == "__main__":
 
@@ -248,8 +203,6 @@ if __name__ == "__main__":
     frame = cv2.imread("test_images_1920x1080/capture_1.png")
     frame_data = frame_analyser.anaylse_frame(frame)
     relative_frame_data = frame_analyser.get_relative_dict(frame_data, 1)
-
-
 
     origin_rvec, origin_tvec =  frame_analyser.find_origin_for_frame(frame, relative_frame_data)
     print(origin_rvec)

@@ -11,21 +11,19 @@
   </head>
   <body style="background-color: black;">
     <script src="three.js"></script>
-    <script src="OrbitControls.js"></script>
     <script>
 
       let windowX = 1920//window.innerWidth
       let windowY = 1080//window.innerHeight
 
       var img = new Image();
-      
+
 
       var scene = new THREE.Scene();
       var renderer = new THREE.WebGLRenderer();
       var origin = new THREE.Vector3(0,0,0);
       renderer.setClearAlpha(0.0);
       var camera = new THREE.PerspectiveCamera( 45, windowX / windowY, 0.01, 1000 );
-      var controls = new THREE.OrbitControls(camera, renderer.domElement);
 
       //Load background texture
       const loader = new THREE.TextureLoader();
@@ -56,11 +54,11 @@
 
       var point = null
 
-      function update_state(state) { 
+      function update_state(state) {
         //console.log(state)
 
         if (state.use_board) {
-          
+
           if (point == null) {
             let temp_scale = 1.85;
             var geometry = new THREE.BoxGeometry( 1.92 * temp_scale, 1.08 * temp_scale, 0.01);
@@ -75,9 +73,9 @@
 
           if (false) {
             if (state.tvec) {
-              point.scale.x = (state.tvec[2])// / state.scale) 
+              point.scale.x = (state.tvec[2])// / state.scale)
               point.scale.y = (state.tvec[2])// / state.scale)
-              
+
               //console.log(1/(state.tvec[2] / state.scale))
             }
           }
@@ -102,7 +100,7 @@
           loader.load(img.src  , function(bgtexture)
                     {
                       //console.log(texture)
-                      scene.background = bgtexture;  
+                      scene.background = bgtexture;
                     });
 
         }
@@ -136,9 +134,9 @@
 
           if (true) {
             if (state.v_origin_tvec) {
-              point.scale.x = (state.v_origin_tvec[2] / state.scale) 
+              point.scale.x = (state.v_origin_tvec[2] / state.scale)
               point.scale.y = (state.v_origin_tvec[2] / state.scale)
-              
+
               //console.log(1/(state.tvec[2] / state.scale))
             }
           }
@@ -147,7 +145,7 @@
             point.scale.x = state.ratio
             point.scale.y = state.ratio
           }
-          
+
           if (state.tvec && state.v_origin_tvec) {
             point.position.x = (state.tvec[0] - state.v_origin_tvec[0]) / -state.scale;
             point.position.y = (state.tvec[1] - state.v_origin_tvec[1]) / -state.scale;
@@ -157,7 +155,7 @@
             else {
               point.position.z = 1; //1.5
             }
-            
+
             // camera.lookAt(point);
 
             point.rotation.x = -(state.rvec[1]);
@@ -167,7 +165,7 @@
           }
 
 
-          //console.log(state)
+          console.log(state)
 
           img.src = "data:image/jpg;base64," + state.frame;
           // console.log(state.tvec[0] / -state.scale)
@@ -177,7 +175,7 @@
           loader.load(img.src  , function(bgtexture)
                     {
                       //console.log(texture)
-                      scene.background = bgtexture;  
+                      scene.background = bgtexture;
                     });
 
         }
@@ -197,13 +195,10 @@
       camera.position.y = 0
       camera.position.z = 0
       camera.up = new THREE.Vector3(0,1,0);
-      controls.target = new THREE.Vector3(0,0,1);
-      controls.update()
 
 
       function animate() {
         requestAnimationFrame( animate );
-        controls.update();
         renderer.render( scene, camera );
       }
       animate();
