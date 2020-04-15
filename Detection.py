@@ -24,7 +24,7 @@ class Detection():
         for corner in corners:
             cv2.cornerSubPix(gray_frame, corner, winSize = (3,3), zeroZone = (-1,-1), criteria = criteria)
 
-        size_of_marker =  0.045 # side length of the marker in meters
+        size_of_marker =  0.0125 # side length of the marker in meters
 
         rvecs, tvecs, objPoints = aruco.estimatePoseSingleMarkers(corners,
                                                                   size_of_marker,

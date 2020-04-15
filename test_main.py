@@ -5,7 +5,7 @@ import cv2
 
 class TestMain(unittest.TestCase):
 
-    def test_euler_conversion(self):
+    def test_rotation_matrix_to_euler_angles(self):
         main = Main()
 
         test_rvecs = np.array([20.0,10.0,0.0])

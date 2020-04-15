@@ -17,11 +17,7 @@ class Frame_Analyser:
         self.calibration_data = calibration_data
         self.detection = Detection(self.calibration_data)
 
-    def calibrate(self, path="calibration_images"):
-        cal = Calibrate(path)
-        self.calibration_data = cal.calibrate_camera()
-
-    def analyse_video(self, video_path, search_aruco_dict=cv2.aruco.DICT_6X6_250, show=False):
+    def analyse_video(self, video_path, search_aruco_dict=cv2.aruco.DICT_6X6_250, show=False, total_markers=12):
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
 
         cap = cv2.VideoCapture(video_path)
@@ -44,16 +40,16 @@ class Frame_Analyser:
                     cap.release()
                     break
 
-            if num_markers == 12:
+            if num_markers == total_markers:
                 break
         return largest_frame_data
 
     def anaylse_frame(self, frame, search_aruco_dict=cv2.aruco.DICT_6X6_250):
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
         frame_data = self.detection.get_markers_in_frame(frame, aruco_dict)
-        
+
         return frame_data
-    
+
     def get_board_origin(self, frame, search_aruco_dict=cv2.aruco.DICT_6X6_250):
         aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
         return self.detection.get_board_in_frame(frame, aruco_dict)
@@ -135,7 +131,7 @@ class Frame_Analyser:
 
         for marker_id in frame_data["ids"]:
             relative_rvec, relative_tvec = self.relative_position(origin_rvec, origin_tvec, frame_data["ids"][marker_id]["marker_rvecs"], frame_data["ids"][marker_id]["marker_tvecs"])
-            
+
             relative_frame_body["relative_rvec"] = relative_rvec
             relative_frame_body["relative_tvec"] = relative_tvec
             relative_frame_data[marker_id] = relative_frame_body.copy()
@@ -244,13 +240,16 @@ class Frame_Analyser:
 
 
 if __name__ == "__main__":
-    
-    frame_analyser = Frame_Analyser()
 
-    #frame_analyser.test_single_frame()
-    frame_analyser.test_realtime()
-    #frame_analyser.test_on_video()
+    camera = Camera()
 
-    #composedRvec, composedTvec = frame_analyser.relative_position(rt_frame_data["ids"][1]["marker_rvecs"], rt_frame_data["ids"][1]["marker_tvecs"], rt_frame_data["ids"][2]["marker_rvecs"], rt_frame_data["ids"][2]["marker_tvecs"])
+    frame_analyser = Frame_Analyser(camera.get_calibration_data())
 
-    
+    frame = cv2.imread("test_images_1920x1080/capture_1.png")
+    frame_data = frame_analyser.anaylse_frame(frame)
+    relative_frame_data = frame_analyser.get_relative_dict(frame_data, 1)
+
+
+
+    origin_rvec, origin_tvec =  frame_analyser.find_origin_for_frame(frame, relative_frame_data)
+    print(origin_rvec)

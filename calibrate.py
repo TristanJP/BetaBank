@@ -7,7 +7,7 @@ from glob import glob
 class Calibrate:
     calibrate_aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
     search_aruco_dict: None
-    board = cv2.aruco.CharucoBoard_create(7,9,.025,.0125, calibrate_aruco_dict)
+    board = cv2.aruco.CharucoBoard_create(7,9,0.025,0.0125, calibrate_aruco_dict)
     CALIBRATION_IMAGE_PATH: str
     CALIBRATION_STORED_DATA = None
 
@@ -79,7 +79,6 @@ class Calibrate:
 
             dist_coeffs_init = np.zeros((5,1))
             flags = (cv2.CALIB_USE_INTRINSIC_GUESS + cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_ASPECT_RATIO)
-            #flags = (cv2.CALIB_RATIONAL_MODEL)
             (ret, camera_matrix, distortion_coefficients,
             rotation_vectors, translation_vectors,
             standard_deviations_intrinsics, standard_deviations_extrinsics,

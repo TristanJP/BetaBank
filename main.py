@@ -99,16 +99,14 @@ class Main():
         return img_undist
 
     # Checks if a matrix is a valid rotation matrix.
-    def is_rotation_matrix(self, R):
-        Rt = np.transpose(R)
-        shouldBeIdentity = np.dot(Rt, R)
-        I = np.identity(3, dtype = R.dtype)
-        n = np.linalg.norm(I - shouldBeIdentity)
+    def is_rotation_matrix(self, rotation_matrix):
+        rotation_matrix_transposed = np.transpose(rotation_matrix)
+        potential_identity = np.dot(rotation_matrix_transposed, rotation_matrix)
+        identity = np.identity(3, dtype = rotation_matrix.dtype)
+        n = np.linalg.norm(identity - potential_identity)
         return n < 1e-6
 
-    # Calculates rotation matrix to euler angles
-    # The result is the same as MATLAB except the order
-    # of the euler angles ( x and z are swapped ).
+    # Converts rotation matrix to euler angles
     def rotation_matrix_to_euler_angles(self, R):
 
         assert(self.is_rotation_matrix(R))
@@ -279,7 +277,6 @@ class Main():
                     #         prev_rotation1 = origin_rvec[:]
                     #         origin_rvec = avg_rvecs[:]
 
-
                     self.current_state["tvec"] = origin_tvec.flatten()
                     self.current_state["rvec"] = origin_rvec
                     self.current_state["scale"] = self.scale*100
@@ -378,6 +375,6 @@ if __name__ == "__main__":
         #main.calculate_relative_dict("test_videos_1280x720/test4.avi", marker_id)
 
         ### Run
-        #main.run_realtime_relative(marker_id)
+        main.run_realtime_relative(marker_id)
         #main.run_video_relative("test_videos_1280x720/test2.avi", marker_id. False)
-        main.run_magic(1)
+        #main.run_magic(1)
