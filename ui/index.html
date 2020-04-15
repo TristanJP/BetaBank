@@ -11,6 +11,7 @@
   </head>
   <body style="background-color: black;">
     <script src="three.js"></script>
+    <script src="OrbitControls.js"></script>
     <script>
 
       let windowX = 1920//window.innerWidth
@@ -24,6 +25,7 @@
       var origin = new THREE.Vector3(0,0,0);
       renderer.setClearAlpha(0.0);
       var camera = new THREE.PerspectiveCamera( 45, windowX / windowY, 0.01, 1000 );
+      var controls = new THREE.OrbitControls(camera, renderer.domElement);
 
       //Load background texture
       const loader = new THREE.TextureLoader();
@@ -165,7 +167,7 @@
           }
 
 
-          console.log(state)
+          //console.log(state)
 
           img.src = "data:image/jpg;base64," + state.frame;
           // console.log(state.tvec[0] / -state.scale)
@@ -195,10 +197,13 @@
       camera.position.y = 0
       camera.position.z = 0
       camera.up = new THREE.Vector3(0,1,0);
+      controls.target = new THREE.Vector3(0,0,1);
+      controls.update()
 
 
       function animate() {
         requestAnimationFrame( animate );
+        controls.update();
         renderer.render( scene, camera );
       }
       animate();
