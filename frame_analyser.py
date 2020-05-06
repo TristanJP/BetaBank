@@ -200,7 +200,7 @@ if __name__ == "__main__":
 
     frame_analyser = Frame_Analyser(camera.get_calibration_data())
 
-    frame = cv2.imread("test_images_1920x1080/capture_1.png")
+    frame = cv2.imread("test_images_1920x1080/capture_2.png")
     frame_data = frame_analyser.anaylse_frame(frame)
     relative_frame_data = frame_analyser.get_relative_dict(frame_data, 1)
 

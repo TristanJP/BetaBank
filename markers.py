@@ -1,5 +1,5 @@
 import sys
-import cv2
+import cv2q
 from cv2 import aruco
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -17,7 +17,7 @@ def generate_aruco_board():
         plt.imshow(image, cmap = mpl.cm.gray, interpolation = "nearest")
         grid.axis("off")
 
-    plt.savefig("images/markers.pdf")
+    plt.savefig("images/markers.png")
     plt.show()
 
 def generate_charuco_board():

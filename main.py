@@ -291,7 +291,7 @@ class Main():
     def run_realtime_relative(self, marker_id):
         print("\nRunning Realtime")
 
-        self.calculate_relative_dict(self.v_path, 1)
+        self.calculate_relative_dict(self.v_path, marker_id)
 
         while True:
             frame = self.cam.current_frame
@@ -334,7 +334,8 @@ if __name__ == "__main__":
 
     use_board = False
 
-    main.v_path = "test_videos_1920x1080/test1.avi"#"test_images_1920x1080/capture_1.png"
+    #main.v_path = "test_videos_1920x1080/test1.avi"
+    main.v_path = "test_images_1920x1080/capture_2.png"
 
     if use_board:
         main.run_board()
@@ -348,4 +349,4 @@ if __name__ == "__main__":
         ### Run
         #main.run_realtime_relative(marker_id)
         #main.run_video_relative("test_videos_1280x720/test2.avi", marker_id. False)
-        main.run_magic(1)
+        main.run_magic(marker_id)

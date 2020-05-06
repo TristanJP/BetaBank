@@ -1,3 +1,4 @@
+import sys
 import cv2
 from cv2 import aruco
 from camera import Camera
@@ -8,9 +9,9 @@ class Capture:
         self.cam = Camera()
         self.cam.start()
 
-    def take_pictures(self, grayscale, image_folder, search_aruco_dict=cv2.aruco.DICT_6X6_250):
+    def take_pictures(self, image_folder="test_images_1920x1080", search_aruco_dict=cv2.aruco.DICT_6X6_250, grayscale=False, captureNum=0):
         search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
-        i = 0
+        i = int(captureNum)
 
         while True:
             # Capture frame-by-frame
@@ -28,15 +29,15 @@ class Capture:
             cv2.imshow('frame', frame_markers)
 
             if cv2.waitKey(10) & 0xFF == ord(' '):
-                
+
                 cv2.imwrite(f"{image_folder}/capture_{i}.png", gray)
                 i += 1
 
             if cv2.waitKey(10) & 0xFF == ord('q'):
                 self.cam.release_camera()
                 break
-    
-    def take_video(self, grayscale, video_folder, filename, search_aruco_dict=cv2.aruco.DICT_6X6_250):
+
+    def take_video(self, filename, video_folder="test_videos_1920x1080", search_aruco_dict=cv2.aruco.DICT_6X6_250, grayscale=False):
 
         out = cv2.VideoWriter(f"{video_folder}/{filename}",cv2.VideoWriter_fourcc('M','J','P','G'), int(self.cam.video_capture.get(5)), (int(self.cam.video_capture.get(3)), int(self.cam.video_capture.get(4))))
 
@@ -66,12 +67,28 @@ class Capture:
 
 
 if __name__ == "__main__":
-    
     cap = Capture()
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "picture":
+            if len(sys.argv) > 2:
+                if len(sys.argv) > 3:
+                    cap.take_pictures(captureNum=sys.argv[2], image_folder=sys.argv[3])
+                else:
+                    cap.take_pictures(captureNum=sys.argv[2])
+            else:
+                cap.take_pictures()
 
-    # Calibration
-    #cap.take_pictures(False, "calibration_images_1920x1080", cv2.aruco.DICT_4X4_50)
+        elif sys.argv[1] == "video":
+            if len(sys.argv) > 2:
+                if len(sys.argv) > 3:
+                    cap.take_video(filename=sys.argv[2], video_folder=sys.argv[3])
+                else:
+                    cap.take_video(filename=sys.argv[2])
+            else:
+                cap.take_video("test3.avi")
+    else:
+        # Defualt to taking pictures
+        cap.take_pictures()
 
-    #cap.take_pictures(False, "test_images_1920x1080")
-
-    cap.take_video(False, "test_videos_1920x1080", "test2.avi")
+        # Calibration test
+        #cap.take_pictures(False, "calibration_images_1920x1080", cv2.aruco.DICT_4X4_50)
