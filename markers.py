@@ -1,5 +1,5 @@
 import sys
-import cv2q
+import cv2
 from cv2 import aruco
 import matplotlib as mpl
 from matplotlib import pyplot as plt
