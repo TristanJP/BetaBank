@@ -9,7 +9,7 @@ class Capture:
         self.cam = Camera()
         self.cam.start()
 
-    def take_pictures(self, image_folder="test_images_1920x1080", search_aruco_dict=cv2.aruco.DICT_6X6_250, grayscale=False, captureNum=0):
+    def take_pictures(self, image_folder="test_images_1920x1080", search_aruco_dict=cv2.aruco.DICT_4X4_50, grayscale=False, captureNum=0):
         search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
         i = int(captureNum)
 

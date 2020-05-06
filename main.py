@@ -130,7 +130,7 @@ class Main():
 
     # BOARD
     def run_board(self):
-        self.calculate_relative_dict(self.v_path, 1)
+        self.calculate_relative_dict(self.relative_capture_path, 1)
         self.scale = main.frame_analyser.get_scale(self.relative_frame_data)
 
         while True:
@@ -162,31 +162,20 @@ class Main():
     def run_magic(self, marker_id):
         print("\nRunning Realtime")
 
-        # GET RELATIVE INFO AN SCALE
-        self.calculate_relative_dict("test_images_1920x1080/capture_1.png", 1)
+        # GET RELATIVE INFO AND SCALE
+        self.calculate_relative_dict(self.relative_capture_path, marker_id)
         self.scale = main.frame_analyser.get_scale(self.relative_frame_data)
-
-        # GET FRAME OF VIDEO FOR ORIGIN INFO
-        cap = cv2.VideoCapture(self.v_path)
-        v_ret, v_frame = cap.read()
 
         delay = 1
 
-        if v_ret:
-            v_origin_rvec, v_origin_tvec = self.frame_analyser.find_origin_for_frame(v_frame, self.relative_frame_data)
-
-        # OLD
-        # prev_rotation1 = None
-        # prev_rotation2 = None
-
         while True:
-            self.current_state["use_board"] = False
+            self.current_state["use_picture"] = True
 
             # GETTING FRAMES
-            # frame = self.cam.current_frame
-            ret = self.cam.successful_read
             frame = self.cam.current_frame
-            #frame = cv2.imread("test_images/capture_0.png")
+            ret = self.cam.successful_read
+            #frame = cv2.imread("test_images_1920x1080/capture_0L.png")
+            #ret = True
 
             # GETTING DATA
             if ret:
@@ -207,42 +196,6 @@ class Main():
                 bg = bg.decode("utf-8")
                 self.current_state["frame"] = bg
 
-                # OLD
-                # # Encode video frame to Base64
-                # if v_frame is not None:
-                #     vf = cv2.imencode(".jpg", v_frame)
-                #     vf = base64.b64encode(vf[1])
-                #     vf = vf.decode("utf-8")
-                #     self.current_state["v_frame"] = vf
-
-                # OLD
-                # RATIO STUFF
-                # if False:
-                #     if frame_data["ids"] is not None:
-                #         if 5 in frame_data["ids"] and 1 in frame_data["ids"] and 5 in v_frame_data["ids"] and 1 in v_frame_data["ids"]:
-                #             rel_pix_dataX = frame_data["ids"][5]["corners"][0] - frame_data["ids"][1]["corners"][0]
-                #             rel_pix_dataY = frame_data["ids"][5]["corners"][1] - frame_data["ids"][1]["corners"][1]
-                #             ratio1 = ((rel_pix_dataX)**2 + (rel_pix_dataY)**2)**(0.5)
-
-                #             Trel_pix_dataX = v_frame_data["ids"][5]["corners"][0] - v_frame_data["ids"][1]["corners"][0]
-                #             Trel_pix_dataY = v_frame_data["ids"][5]["corners"][1] - v_frame_data["ids"][1]["corners"][1]
-
-                #             ratio2 = ((Trel_pix_dataX)**2 + (Trel_pix_dataY)**2)**(0.5)
-
-                #             ratio = ratio1 / ratio2
-
-                #             self.current_state["ratio"] = ratio
-
-                    # rel_frame_data = self.frame_analyser.get_relative_dict(frame_data, 1)
-
-                    # s1 = rel_frame_data[5]["relative_tvec"]
-                    # s2 = self.relative_frame_data[5]["relative_tvec"]
-
-                    # tratio1 = ((s1[0])**2 + (s1[1])**2 + (s1[2])**2)**(0.5)
-                    # tratio2 = ((s2[0])**2 + (s2[1])**2 + (s2[2])**2)**(0.5)
-
-                    # tratio = tratio1 / tratio2
-
 
                 if False:
                     # Calcs distance of markers from camera
@@ -251,38 +204,15 @@ class Main():
 
 
                 # Send through websocket
-                if origin_tvec is not None and v_origin_tvec is not None:
+                if origin_tvec is not None:
                     R, _ = cv2.Rodrigues(origin_rvec)
                     origin_rvec = self.rotation_matrix_to_euler_angles(R)
 
                     origin_rvec = origin_rvec.flatten()
 
-                    # OLD
-                    # AVERAGE ROTATION ACROSS FRAMES (avoid flickering)
-                    # if False:
-                    #     # Ignore first frame as nothing to compare with
-                    #     if prev_rotation1 is None:
-                    #         prev_rotation1 = origin_rvec[:]
-                    #     elif prev_rotation2 is None:
-                    #         prev_rotation2 = prev_rotation1[:]
-                    #         prev_rotation1 = origin_rvec[:]
-                    #     else:
-                    #         if (origin_rvec[0] / prev_rotation1[0] < 0  and origin_rvec[1] / prev_rotation1[1] < 0):
-                    #             origin_rvec[0] *= -1
-                    #             origin_rvec[1] *= -1
-
-                    #         sum_rvecs = prev_rotation1 + prev_rotation2 + origin_rvec
-                    #         avg_rvecs = sum_rvecs/3
-                    #         prev_rotation2 = prev_rotation1[:]
-                    #         prev_rotation1 = origin_rvec[:]
-                    #         origin_rvec = avg_rvecs[:]
-
                     self.current_state["tvec"] = origin_tvec.flatten()
                     self.current_state["rvec"] = origin_rvec
                     self.current_state["scale"] = self.scale*100
-
-                    self.current_state["v_origin_tvec"] = v_origin_tvec.flatten()
-                    self.current_state["v_origin_rvec"] = v_origin_rvec
 
             if cv2.waitKey(delay) & 0xFF == ord('q'):
                 self.cam.release_camera()
@@ -291,7 +221,7 @@ class Main():
     def run_realtime_relative(self, marker_id):
         print("\nRunning Realtime")
 
-        self.calculate_relative_dict(self.v_path, marker_id)
+        self.calculate_relative_dict(self.relative_capture_path, marker_id)
 
         while True:
             frame = self.cam.current_frame
@@ -334,8 +264,8 @@ if __name__ == "__main__":
 
     use_board = False
 
-    #main.v_path = "test_videos_1920x1080/test1.avi"
-    main.v_path = "test_images_1920x1080/capture_2.png"
+    #main.relative_capture_path = "test_videos_1920x1080/test3.avi"
+    main.relative_capture_path = "test_images_1920x1080/capture_2.png"
 
     if use_board:
         main.run_board()
