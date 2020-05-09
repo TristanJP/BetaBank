@@ -169,7 +169,7 @@ class Main():
         delay = 1
 
         while True:
-            self.current_state["use_picture"] = True
+            self.current_state["use_picture"] = False
 
             # GETTING FRAMES
             frame = self.cam.current_frame
