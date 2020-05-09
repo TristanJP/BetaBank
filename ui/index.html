@@ -64,7 +64,7 @@
           // USE PICTURE ======================================
 
           if (point == null) {
-            let temp_scale = 1.2;
+            let temp_scale = 0.75;
             var geometry = new THREE.BoxGeometry( 1.92 * temp_scale, 1.08 * temp_scale, 0.01);
             var texture = THREE.ImageUtils.loadTexture('capture_0L.png', {}, function() {
               renderer.render(scene, camera);
@@ -103,20 +103,20 @@
           }
         }
 
-        if (true) {
+        if (false) {
           if (state.tvec) {
-            point.scale.x = (state.tvec[2])/2// / state.scale)
-            point.scale.y = (state.tvec[2])/2// / state.scale)
+            point.scale.x = (state.tvec[2])*2 / state.scale;
+            point.scale.y = (state.tvec[2])*2 / state.scale;
 
             //console.log(1/(state.tvec[2] / state.scale))
           }
         }
 
         if (state.tvec) {
-          point.position.x = (state.tvec[0])// / -state.scale;
-          point.position.y = (state.tvec[1])// / -state.scale;
+          point.position.x = ((state.tvec[0]*4) / -state.scale) + 0.015;
+          point.position.y = ((state.tvec[1]*4) / -state.scale) + 0.01;
           if (true) {
-            point.position.z = ((state.tvec[2]))// / state.scale);
+            point.position.z = ((state.tvec[2])*4) / state.scale;
           }
           else {
             point.position.z = 0.7; //1.5
@@ -124,7 +124,7 @@
 
           point.rotation.x = -(state.rvec[1]);
           point.rotation.y = (state.rvec[0]);
-          point.rotation.z = -(state.rvec[2]);
+          point.rotation.z = -(state.rvec[2] + 1.570796);
           //console.log(state.rvec)
         }
 
