@@ -1,8 +1,3 @@
-import cv2
-import os
-import asyncio
-import threading
-import websockets
 from http.server import HTTPServer
 from websocket import Websocket
 from static_server import StaticServer
@@ -10,10 +5,16 @@ from cv2 import aruco
 from detection import Detection
 from camera import Camera
 from frame_analyser import Frame_Analyser
-import numpy as np
 from view import View
-import pygame
 from PIL import Image
+
+import cv2
+import os
+import sys
+import asyncio
+import threading
+import websockets
+import numpy as np
 import base64
 import math
 
@@ -62,10 +63,10 @@ class Main():
         print("\nGetting Init Frame Data:")
         path = input_data.split("/")
         new_name = f"{path[1][:-4]}_FD.npy"
-        for root, dirs, files in os.walk(path[0]):
+        for root, dirs, files in os.walk("ui/"+path[0]):
             if new_name in files:
-                print(f" Found previous data: {path[0]}/{new_name}, loading...")
-                frame_data = np.load(f"{path[0]}/{new_name}", allow_pickle='TRUE').item()
+                print(f" Found previous data: ui/{path[0]}/{new_name}, loading...")
+                frame_data = np.load(f"ui/{path[0]}/{new_name}", allow_pickle='TRUE').item()
                 break
 
         if frame_data is None:
@@ -73,14 +74,14 @@ class Main():
                 print("  Generating Frame Data...")
                 file_type = input_data[-4:]
                 if file_type in (".avi"):
-                    frame_data = self.frame_analyser.analyse_video(input_data)
+                    frame_data = self.frame_analyser.analyse_video("ui/"+input_data)
                 elif file_type in (".png", ".jpg"):
                     image = cv2.imread(input_data)
-                    frame_data = self.frame_analyser.anaylse_frame(image)
+                    frame_data = self.frame_analyser.anaylse_frame("ui/"+image)
                 else:
                     frame_data = None
-                np.save(f"{path[0]}/{new_name}", frame_data)
-                print(f"  Saved data as: {path[0]}/{new_name}")
+                np.save(f"ui/{path[0]}/{new_name}", frame_data)
+                print(f"  Saved data as: ui/{path[0]}/{new_name}")
             elif False:
                 # Do not support frames as input
                 frame_data = self.frame_analyser.anaylse_frame(input_data)
@@ -159,36 +160,33 @@ class Main():
                 self.current_state["frame"] = bg
 
     # SINGLE MARKERS
-    def run_magic(self, marker_id):
+    def run_webgl(self, marker_id=1, relative_source_path="test_images_1920x1080/capture_2.png", display_path="test_videos_1920x1080/demo2.mp4", use_picture=False):
         print("\nRunning Realtime")
 
+        self.current_state["path"] = display_path
+
         # GET RELATIVE INFO AND SCALE
-        self.calculate_relative_dict(self.relative_capture_path, marker_id)
+        self.calculate_relative_dict(relative_source_path, marker_id)
         self.scale = main.frame_analyser.get_scale(self.relative_frame_data)
+        self.current_state["scale"] = self.scale*100
 
         delay = 1
 
         while True:
-            self.current_state["use_picture"] = False
+            self.current_state["use_picture"] = (use_picture in ["True", "true", "1"])
 
             # GETTING FRAMES
             frame = self.cam.current_frame
             ret = self.cam.successful_read
-            #frame = cv2.imread("test_images_1920x1080/capture_0L.png")
-            #ret = True
 
             # GETTING DATA
             if ret:
-                #frame_undist = self.get_undistorted_image(frame)
                 frame_undist = frame
 
                 frame_data = self.frame_analyser.anaylse_frame(frame)
 
                 # Calc origin
                 origin_rvec, origin_tvec = self.frame_analyser.find_origin_for_frame(frame, self.relative_frame_data)
-
-                # GETTING UNDISTORTED IMAGE
-                #frame_undist = self.get_undistorted_image(frame)
 
                 # Encode frame to Base64
                 bg = cv2.imencode(".jpg", frame_undist)
@@ -212,7 +210,6 @@ class Main():
 
                     self.current_state["tvec"] = origin_tvec.flatten()
                     self.current_state["rvec"] = origin_rvec
-                    self.current_state["scale"] = self.scale*100
 
             if cv2.waitKey(delay) & 0xFF == ord('q'):
                 self.cam.release_camera()
@@ -262,14 +259,37 @@ if __name__ == "__main__":
     main = Main()
     main.start()
 
-    use_board = False
-
-    #main.relative_capture_path = "test_videos_1920x1080/test3.avi"
-    main.relative_capture_path = "test_images_1920x1080/capture_2.png"
-
-    if use_board:
-        main.run_board()
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "webgl":
+            if len(sys.argv) > 2:
+                if len(sys.argv) > 3:
+                        if len(sys.argv) > 4:
+                            main.run_webgl(relative_source_path=sys.argv[2], display_path=sys.argv[3], use_picture=sys.argv[4])
+                        else:
+                            main.run_webgl(relative_source_path=sys.argv[2], display_path=sys.argv[3])
+                else:
+                    main.run_webgl(relative_source_path=sys.argv[2])
+            else:
+                main.run_webgl()
+        # elif sys.argv[1] == "realtime":
+        #     if len(sys.argv) > 2:
+        #         if len(sys.argv) > 3:
+        #             cap.take_video(filename=sys.argv[2], video_folder=sys.argv[3])
+        #         else:
+        #             cap.take_video(filename=sys.argv[2])
+        #     else:
+        #         cap.take_video("test3.avi")
+        # elif sys.argv[1] == "video":
+        #     if len(sys.argv) > 2:
+        #         if len(sys.argv) > 3:
+        #             cap.take_video(filename=sys.argv[2], video_folder=sys.argv[3])
+        #         else:
+        #             cap.take_video(filename=sys.argv[2])
+        #     else:
+        #         cap.take_video("test3.avi")
     else:
+        # Default to ThreeJS
+
         marker_id = 1
 
         # OLD
@@ -279,4 +299,4 @@ if __name__ == "__main__":
         ### Run
         #main.run_realtime_relative(marker_id)
         #main.run_video_relative("test_videos_1280x720/test2.avi", marker_id. False)
-        main.run_magic(marker_id)
+        main.run_webgl(marker_id)

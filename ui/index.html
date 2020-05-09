@@ -66,7 +66,7 @@
           if (point == null) {
             let temp_scale = 0.75;
             var geometry = new THREE.BoxGeometry( 1.92 * temp_scale, 1.08 * temp_scale, 0.01);
-            var texture = THREE.ImageUtils.loadTexture('capture_0L.png', {}, function() {
+            var texture = THREE.ImageUtils.loadTexture(state.path, {}, function() {
               renderer.render(scene, camera);
             })
             var material = new THREE.MeshBasicMaterial({map: texture, transparent: true })
@@ -85,7 +85,7 @@
             var geometry = new THREE.BoxGeometry( 1.92 * temp_scale, 1.08 * temp_scale, 0.01 );
 
             var video = document.createElement( 'video' );
-            video.src = "demo2.mp4";
+            video.src = state.path;
             video.load();
             video.autoplay = true;
             video.muted = "muted";
