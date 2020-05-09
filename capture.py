@@ -9,7 +9,7 @@ class Capture:
         self.cam = Camera()
         self.cam.start()
 
-    def take_pictures(self, image_folder="test_images_1920x1080", search_aruco_dict=cv2.aruco.DICT_4X4_50, grayscale=False, captureNum=0):
+    def take_pictures(self, image_folder="ui/test_images_1920x1080", search_aruco_dict=cv2.aruco.DICT_4X4_50, grayscale=False, captureNum=0):
         search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
         i = int(captureNum)
 
@@ -37,9 +37,9 @@ class Capture:
                 self.cam.release_camera()
                 break
 
-    def take_video(self, filename, video_folder="test_videos_1920x1080", search_aruco_dict=cv2.aruco.DICT_6X6_250, grayscale=False):
+    def take_video(self, filename, video_folder="ui/test_videos_1920x1080", search_aruco_dict=cv2.aruco.DICT_6X6_250, grayscale=False):
 
-        out = cv2.VideoWriter(f"{video_folder}/{filename}",cv2.VideoWriter_fourcc('M','J','P','G'), int(self.cam.video_capture.get(5)), (int(self.cam.video_capture.get(3)), int(self.cam.video_capture.get(4))))
+        out = cv2.VideoWriter(f"{video_folder}/{filename}",cv2.VideoWriter_fourcc('m','p','4','v'), int(self.cam.video_capture.get(5)), (int(self.cam.video_capture.get(3)), int(self.cam.video_capture.get(4))))
 
         search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
 
@@ -85,7 +85,7 @@ if __name__ == "__main__":
                 else:
                     cap.take_video(filename=sys.argv[2])
             else:
-                cap.take_video("test3.avi")
+                cap.take_video("test1.mp4")
     else:
         # Defualt to taking pictures
         cap.take_pictures()
