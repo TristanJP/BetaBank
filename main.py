@@ -73,11 +73,11 @@ class Main():
             if type(input_data) == str:
                 print("  Generating Frame Data...")
                 file_type = input_data[-4:]
-                if file_type in (".avi"):
+                if file_type in (".mp4"):
                     frame_data = self.frame_analyser.analyse_video("ui/"+input_data)
                 elif file_type in (".png", ".jpg"):
-                    image = cv2.imread(input_data)
-                    frame_data = self.frame_analyser.anaylse_frame("ui/"+image)
+                    image = cv2.imread("ui/"+input_data)
+                    frame_data = self.frame_analyser.anaylse_frame(image)
                 else:
                     frame_data = None
                 np.save(f"ui/{path[0]}/{new_name}", frame_data)
@@ -215,10 +215,10 @@ class Main():
                 self.cam.release_camera()
                 break
 
-    def run_realtime_relative(self, marker_id):
+    def run_realtime_relative(self, marker_id=1, relative_source_path="test_images_1920x1080/capture_2.png", shape="cube"):
         print("\nRunning Realtime")
 
-        self.calculate_relative_dict(self.relative_capture_path, marker_id)
+        self.calculate_relative_dict(relative_source_path, marker_id)
 
         while True:
             frame = self.cam.current_frame
@@ -226,20 +226,23 @@ class Main():
 
             origin_rvec, origin_tvec = self.frame_analyser.find_origin_for_frame(frame, self.relative_frame_data)
 
-            self.view.render_origin(frame, ret, origin_rvec, origin_tvec)
+            self.view.render_origin(frame, ret, origin_rvec, origin_tvec, shape)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.cam.release_camera()
                 break
 
-    def run_video_relative(self, video_path, marker_id, loop=False):
+    def run_video_relative(self, marker_id=1, relative_source_path="test_images_1920x1080/capture_2.png", video_path="test_videos_1920x1080/test1.mp4", loop=True):
         print("\nRunning Video")
-        cap = cv2.VideoCapture(video_path)
+
+        self.calculate_relative_dict(relative_source_path, marker_id)
+
+        cap = cv2.VideoCapture("ui/"+video_path)
         delay = int((1/cap.get(5))*(1000/3))
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
-                if loop:
+                if loop in ["True", "true"]:
                     cap.set(2, 0)
                     ret, frame = cap.read()
                 else:
@@ -268,22 +271,25 @@ if __name__ == "__main__":
                     main.run_webgl(relative_source_path=sys.argv[2])
             else:
                 main.run_webgl()
-        # elif sys.argv[1] == "realtime":
-        #     if len(sys.argv) > 2:
-        #         if len(sys.argv) > 3:
-        #             cap.take_video(filename=sys.argv[2], video_folder=sys.argv[3])
-        #         else:
-        #             cap.take_video(filename=sys.argv[2])
-        #     else:
-        #         cap.take_video("test3.avi")
-        # elif sys.argv[1] == "video":
-        #     if len(sys.argv) > 2:
-        #         if len(sys.argv) > 3:
-        #             cap.take_video(filename=sys.argv[2], video_folder=sys.argv[3])
-        #         else:
-        #             cap.take_video(filename=sys.argv[2])
-        #     else:
-        #         cap.take_video("test3.avi")
+        elif sys.argv[1] == "realtime":
+            if len(sys.argv) > 2:
+                if len(sys.argv) > 3:
+                    main.run_realtime_relative(relative_source_path=sys.argv[2], shape=sys.argv[3])
+                else:
+                    main.run_realtime_relative(relative_source_path=sys.argv[2])
+            else:
+                main.run_realtime_relative()
+        elif sys.argv[1] == "video":
+            if len(sys.argv) > 2:
+                if len(sys.argv) > 3:
+                    if len(sys.argv) > 4:
+                        main.run_video_relative(relative_source_path=sys.argv[2], video_path=sys.argv[3], loop=sys.argv[4])
+                    else:
+                        main.run_video_relative(relative_source_path=sys.argv[2], video_path=sys.argv[3])
+                else:
+                    main.run_video_relative(relative_source_path=sys.argv[2])
+            else:
+                main.run_video_relative()
     else:
         # Default to ThreeJS
 
