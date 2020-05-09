@@ -39,7 +39,7 @@ class Capture:
 
     def take_video(self, filename, video_folder="ui/test_videos_1920x1080", search_aruco_dict=cv2.aruco.DICT_6X6_250, grayscale=False):
 
-        out = cv2.VideoWriter(f"{video_folder}/{filename}",cv2.VideoWriter_fourcc('m','p','4','v'), int(self.cam.video_capture.get(5)), (int(self.cam.video_capture.get(3)), int(self.cam.video_capture.get(4))))
+        out = cv2.VideoWriter(f"{video_folder}/{filename}",cv2.VideoWriter_fourcc('m','p','4','v'), 20, (int(self.cam.video_capture.get(3)), int(self.cam.video_capture.get(4))))
 
         search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
 
