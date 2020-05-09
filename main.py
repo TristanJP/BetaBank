@@ -160,7 +160,7 @@ class Main():
                 self.current_state["frame"] = bg
 
     # SINGLE MARKERS
-    def run_webgl(self, marker_id=1, relative_source_path="test_images_1920x1080/capture_2.png", display_path="test_videos_1920x1080/demo2.mp4", use_picture=False):
+    def run_webgl(self, marker_id=1, relative_source_path="test_images_1920x1080/capture_2.png", display_path="test_videos_1920x1080/demo2.mp4"):
         print("\nRunning Realtime")
 
         self.current_state["path"] = display_path
@@ -173,7 +173,7 @@ class Main():
         delay = 1
 
         while True:
-            self.current_state["use_picture"] = (use_picture in ["True", "true", "1"])
+            self.current_state["use_picture"] = (display_path[-4:] in [".png", ".jpg"])
 
             # GETTING FRAMES
             frame = self.cam.current_frame
@@ -263,10 +263,7 @@ if __name__ == "__main__":
         if sys.argv[1] == "webgl":
             if len(sys.argv) > 2:
                 if len(sys.argv) > 3:
-                        if len(sys.argv) > 4:
-                            main.run_webgl(relative_source_path=sys.argv[2], display_path=sys.argv[3], use_picture=sys.argv[4])
-                        else:
-                            main.run_webgl(relative_source_path=sys.argv[2], display_path=sys.argv[3])
+                        main.run_webgl(relative_source_path=sys.argv[2], display_path=sys.argv[3])
                 else:
                     main.run_webgl(relative_source_path=sys.argv[2])
             else:
