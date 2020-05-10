@@ -22,7 +22,7 @@ class BetaBank(toga.App):
         main_box = toga.Box(style=Pack(direction=COLUMN))
 
         name_label = toga.Label(
-            'File name: ',
+            'File name to capture: ',
             style=Pack(padding=(0, 5))
         )
         self.name_input = toga.TextInput(style=Pack(flex=1))
@@ -46,11 +46,23 @@ class BetaBank(toga.App):
         )
         main_box.add(button_capture_video)
 
+
+        display_label = toga.Label(
+            'File name to display: ',
+            style=Pack(padding=(0, 5))
+        )
+        self.display_input = toga.TextInput(style=Pack(flex=1))
+
+        dsiplay_box = toga.Box(style=Pack(direction=ROW, padding=5))
+        dsiplay_box.add(display_label)
+        dsiplay_box.add(self.display_input)
+
         button_run_webgl = toga.Button(
             'Run Webgl',
             on_press=self.run_webgl,
             style=Pack(padding=5)
         )
+        main_box.add(dsiplay_box)
         main_box.add(button_run_webgl)
 
         self.main_window = toga.MainWindow(title=self.formal_name)
@@ -69,7 +81,10 @@ class BetaBank(toga.App):
     def run_webgl(self, widget):
         main = Main()
         main.start()
-        main.run_webgl()
+        if self.display_input.value is not "":
+            main.run_webgl(display_path=f"test_videos_1920x1080/{self.display_input.value}")
+        else:
+            main.run_webgl()
 
 
 def main():

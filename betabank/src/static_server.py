@@ -2,7 +2,7 @@ from http.server import BaseHTTPRequestHandler
 
 class StaticServer(BaseHTTPRequestHandler):
   def do_GET(self):
-    root = 'ui'
+    root = './src/ui'
     if self.path == '/':
       filename = root + '/index.html'
     else:

@@ -9,5 +9,5 @@ py src/capture.py picture demo1.png
 
 ## Display Video
 ```python
-py main.py webjs "test_images_1920x1080/capture_2.png" "test_videos_1920x1080/demo2.mp4"
+py src/main.py webgl "test_images_1920x1080/capture_2.png" "test_videos_1920x1080/demo2.mp4"
 ```

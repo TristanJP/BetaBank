@@ -62,10 +62,10 @@ class Main():
         print("\nGetting Init Frame Data:")
         path = input_data.split("/")
         new_name = f"{path[1][:-4]}_FD.npy"
-        for root, dirs, files in os.walk("ui/"+path[0]):
+        for root, dirs, files in os.walk("."):
             if new_name in files:
-                print(f" Found previous data: ui/{path[0]}/{new_name}, loading...")
-                frame_data = np.load(f"ui/{path[0]}/{new_name}", allow_pickle='TRUE').item()
+                print(f" Found previous data: ./src/ui/{path[0]}/{new_name}, loading...")
+                frame_data = np.load(f"./src/ui/{path[0]}/{new_name}", allow_pickle='TRUE').item()
                 break
 
         if frame_data is None:
@@ -166,7 +166,7 @@ class Main():
 
         # GET RELATIVE INFO AND SCALE
         self.calculate_relative_dict(relative_source_path, marker_id)
-        self.scale = main.frame_analyser.get_scale(self.relative_frame_data)
+        self.scale = self.frame_analyser.get_scale(self.relative_frame_data)
         self.current_state["scale"] = self.scale*100
 
         delay = 1
