@@ -14,7 +14,6 @@ class Calibrate:
     calibration_data: dict
 
     def __init__(self, path="calibration_images_1920x1080", search_aruco_dict=cv2.aruco.DICT_6X6_250):
-        print("INITIALISED ==============")
         self.CALIBRATION_IMAGE_PATH = path
         self.search_aruco_dict = cv2.aruco.getPredefinedDictionary(search_aruco_dict)
         name = f"{path}.yaml"
@@ -35,7 +34,7 @@ class Calibrate:
         all_ids = []
         decimator = 0
 
-        # SUB PIXEL CORNER DETECTION CRITERIA
+        # CORNER DETECTION CRITERIA FOR SUB PIXELS
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.00001)
 
         for image in images:
@@ -48,12 +47,12 @@ class Calibrate:
 
                 # SUB PIXEL DETECTION
                 for corner in corners:
-                    cv2.cornerSubPix(gray, corner,  winSize = (3,3),  zeroZone = (-1,-1), criteria = criteria)
+                    cv2.cornerSubPix(gray, corner,  winSize=(3, 3),  zeroZone=(-1, -1), criteria=criteria)
 
-                res2 = cv2.aruco.interpolateCornersCharuco(corners,ids,gray,self.board)
-                if res2[1] is not None and res2[2] is not None and len(res2[1])>3 and decimator%1==0:
-                    all_corners.append(res2[1])
-                    all_ids.append(res2[2])
+                interpCorners = cv2.aruco.interpolateCornersCharuco(corners, ids, gray, self.board)
+                if interpCorners[1] is not None and interpCorners[2] is not None and len(interpCorners[1])>3 and decimator%1==0:
+                    all_corners.append(interpCorners[1])
+                    all_ids.append(interpCorners[2])
 
             decimator+=1
 
