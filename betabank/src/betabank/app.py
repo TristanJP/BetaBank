@@ -4,8 +4,8 @@ Beta Bank Augmented Reality Climbing Solution
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
-from main import Main
-from capture import Capture
+from .main import Main
+from .capture import Capture
 
 
 class BetaBank(toga.App):
