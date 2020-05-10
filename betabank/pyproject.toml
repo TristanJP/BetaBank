@@ -1,0 +1,51 @@
+[build-system]
+requires = ["briefcase"]
+
+[tool.briefcase]
+project_name = "Beta Bank"
+bundle = "com.example"
+version = "0.0.1"
+url = "https://example.com/betabank"
+license = "BSD license"
+author = 'Tristan Perkins'
+author_email = "trisperk@hotmail.com"
+
+[tool.briefcase.app.betabank]
+formal_name = "Beta Bank"
+description = "Beta Bank Augmented Reality Climbing Solution"
+icon = "src/betabank/resources/betabank"
+sources = ['src/betabank']
+requires = []
+
+
+[tool.briefcase.app.betabank.macOS]
+requires = [
+    'toga-cocoa>=0.3.0.dev18',
+]
+
+[tool.briefcase.app.betabank.linux]
+requires = [
+    'toga-gtk>=0.3.0.dev18',
+]
+system_requires = [
+    'libgirepository1.0-dev',
+    'libcairo2-dev',
+    'libpango1.0-dev',
+    'libwebkitgtk-3.0-0',
+    'gir1.2-webkit-3.0',
+]
+[tool.briefcase.app.betabank.windows]
+requires = [
+    'toga-winforms>=0.3.0.dev18',
+]
+
+# Mobile deployments
+[tool.briefcase.app.betabank.iOS]
+requires = [
+    'toga-iOS>=0.3.0.dev18',
+]
+
+[tool.briefcase.app.betabank.android]
+requires = [
+    'toga-android>=0.3.0.dev18',
+]

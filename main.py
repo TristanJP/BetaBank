@@ -6,7 +6,6 @@ from detection import Detection
 from camera import Camera
 from frame_analyser import Frame_Analyser
 from view import View
-from PIL import Image
 
 import cv2
 import os
