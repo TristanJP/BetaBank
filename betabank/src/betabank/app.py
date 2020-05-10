@@ -11,25 +11,18 @@ from .capture import Capture
 class BetaBank(toga.App):
 
     def startup(self):
-        """
-        Construct and show the Toga application.
-
-        Usually, you would add your application to a main content box.
-        We then create a main window (with a name matching the app), and
-        show the main window.
-        """
 
         main_box = toga.Box(style=Pack(direction=COLUMN))
 
-        name_label = toga.Label(
+        filename_label = toga.Label(
             'File name to capture: ',
             style=Pack(padding=(0, 5))
         )
-        self.name_input = toga.TextInput(style=Pack(flex=1))
+        self.filename_input = toga.TextInput(style=Pack(flex=2))
 
         name_box = toga.Box(style=Pack(direction=ROW, padding=5))
-        name_box.add(name_label)
-        name_box.add(self.name_input)
+        name_box.add(filename_label)
+        name_box.add(self.filename_input)
 
         button_capture_image = toga.Button(
             'Capture Image',
@@ -71,11 +64,11 @@ class BetaBank(toga.App):
 
     def capture_image(self, widget):
         cap = Capture()
-        cap.take_pictures(self.name_input.value)
+        cap.take_pictures(self.filename_input.value)
 
     def capture_video(self, widget):
         cap = Capture()
-        cap.take_video(self.name_input.value)
+        cap.take_video(self.filename_input.value)
 
 
     def run_webgl(self, widget):
