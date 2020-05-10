@@ -3,7 +3,8 @@ FYP
 
 ## Capture Video
 ```python
-py capture.py video demo1.mp4
+py src/capture.py video demo1.mp4
+py src/capture.py picture demo1.png
 ```
 
 ## Display Video

@@ -28,12 +28,12 @@ class Capture:
 
             cv2.imshow('Capture Image', frame_markers)
 
-            if cv2.waitKey(1) & 0xFF == ord(' '):
-
-                cv2.imwrite(f"{image_folder}/capture_{i}.png", gray)
+            if cv2.waitKey(10) & 0xFF == ord(' '):
+                print(f"{image_folder}/{filename[:-4]}_{i}{filename[-4:]}")
+                cv2.imwrite(f"{image_folder}/{filename[:-4]}_{i}{filename[-4:]}", gray)
                 i += 1
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(10) & 0xFF == ord('q'):
                 self.cam.release_camera()
                 cv2.destroyAllWindows()
                 break

@@ -46,6 +46,13 @@ class BetaBank(toga.App):
         )
         main_box.add(button_capture_video)
 
+        button_run_webgl = toga.Button(
+            'Run Webgl',
+            on_press=self.run_webgl,
+            style=Pack(padding=5)
+        )
+        main_box.add(button_run_webgl)
+
         self.main_window = toga.MainWindow(title=self.formal_name)
         self.main_window.content = main_box
         self.main_window.show()
