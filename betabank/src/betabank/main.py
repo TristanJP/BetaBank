@@ -273,6 +273,21 @@ class Main():
                 self.cam.release_camera()
                 break
 
+    def run_image_all(self, marker_id=1, relative_source_path="test_images_1920x1080/capture_2.png", image_path="test_images_1920x1080/capture_2.png", shape="cube"):
+        print("\nRunning Realtime")
+
+        frame = cv2.imread("src/betabank/ui/"+image_path)
+        ret = True
+
+        while True:
+            frame_data = self.frame_analyser.anaylse_frame(frame)
+
+            self.view.render_all(frame, ret, frame_data, shape)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.cam.release_camera()
+                break
+
 if __name__ == "__main__":
 
     main = Main()
@@ -320,6 +335,17 @@ if __name__ == "__main__":
                     main.run_image_relative(relative_source_path=sys.argv[2])
             else:
                 main.run_image_relative()
+        elif sys.argv[1] == "image_all":
+            if len(sys.argv) > 2:
+                if len(sys.argv) > 3:
+                    if len(sys.argv) > 4:
+                            main.run_image_all(relative_source_path=sys.argv[2], image_path=sys.argv[3], shape=sys.argv[4])
+                    else:
+                        main.run_image_all(relative_source_path=sys.argv[2], image_path=sys.argv[3])
+                else:
+                    main.run_image_all(relative_source_path=sys.argv[2])
+            else:
+                main.run_image_all()
     else:
         # Default to ThreeJS
 
