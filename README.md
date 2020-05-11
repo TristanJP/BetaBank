@@ -21,14 +21,15 @@ briefcase dev
 ```
 
 ## CLI Controls
+From top `betabank/` directory:
 
 ### Capture Video
 ```
-py src/capture.py video demo1.mp4
-py src/capture.py picture demo1.png
+py -m src.betabank.capture video demo1.mp4
+py -m src.betabank.capture picture demo1.png
 ```
 
 ### Display in WebGL
 ```
-py src/main.py webgl "test_images_1920x1080/capture_2.png" "test_videos_1920x1080/demo2.mp4"
+py -m src.betabank.main webgl "test_images_1920x1080/capture_2.png" "test_videos_1920x1080/demo2.mp4"
 ```

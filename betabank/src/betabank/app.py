@@ -14,8 +14,14 @@ class BetaBank(toga.App):
 
         main_box = toga.Box(style=Pack(direction=COLUMN))
 
+        capture_label = toga.Label(
+            '\nCapture',
+            style=Pack(padding=(0, 5))
+        )
+        main_box.add(capture_label)
+
         filename_label = toga.Label(
-            'File name to capture: ',
+            'Captured Image/Video name: ',
             style=Pack(padding=(0, 5))
         )
         self.filename_input = toga.TextInput(style=Pack(flex=2))
@@ -39,23 +45,28 @@ class BetaBank(toga.App):
         )
         main_box.add(button_capture_video)
 
-
         display_label = toga.Label(
-            'File name to display: ',
+            '\n\nDisplay',
+            style=Pack(padding=(0, 5))
+        )
+
+        display_webgl_label = toga.Label(
+            'Display Video name: ',
             style=Pack(padding=(0, 5))
         )
         self.display_input = toga.TextInput(style=Pack(flex=1))
 
-        dsiplay_box = toga.Box(style=Pack(direction=ROW, padding=5))
-        dsiplay_box.add(display_label)
-        dsiplay_box.add(self.display_input)
+        display_box = toga.Box(style=Pack(direction=ROW, padding=5))
+        display_box.add(display_webgl_label)
+        display_box.add(self.display_input)
 
         button_run_webgl = toga.Button(
-            'Run Webgl',
+            'Display in AR',
             on_press=self.run_webgl,
             style=Pack(padding=5)
         )
-        main_box.add(dsiplay_box)
+        main_box.add(display_label)
+        main_box.add(display_box)
         main_box.add(button_run_webgl)
 
         self.main_window = toga.MainWindow(title=self.formal_name)

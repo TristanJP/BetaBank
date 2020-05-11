@@ -10,6 +10,7 @@ class Calibrate:
     board = cv2.aruco.CharucoBoard_create(7,9,0.025,0.0125, calibrate_aruco_dict)
     CALIBRATION_IMAGE_PATH: str
     CALIBRATION_STORED_DATA = None
+    ROOT = "src/betabank/"
 
     calibration_data: dict
 
@@ -137,5 +138,6 @@ if __name__ == "__main__":
 
     cal.calibrate_camera()
 
-    undist = cal.get_undistorted_image(f"{cal.CALIBRATION_IMAGE_PATH}/capture_7.png")
+    undist = cal.get_undistorted_image(f"{cal.ROOT}ui/test_images_1920x1080/demo_view_1.png")
     cal.show_images(undist)
+    cv2.imwrite(f"{cal.ROOT}ui/test_images_1920x1080/demo_view_1_UNDIST_.png", undist[1])
