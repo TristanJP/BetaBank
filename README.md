@@ -29,7 +29,17 @@ py -m src.betabank.capture video demo1.mp4
 py -m src.betabank.capture picture demo1.png
 ```
 
-### Display in WebGL
+## Display in WebGL (MAIN)
 ```
 py -m src.betabank.main webgl "test_images_1920x1080/capture_2.png" "test_videos_1920x1080/demo2.mp4"
+```
+
+### Display Origin Pose in Image
+```
+py -m src.betabank.main image "test_images_1920x1080/capture_2.png" "test_images_1920x1080/capture_1.png" "axis"
+```
+
+### Display Origin Pose in Video
+```
+py -m src.betabank.main video "test_images_1920x1080/capture_2.png" "test_videos_1920x1080/demo2.mp4" "cube"
 ```

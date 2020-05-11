@@ -231,12 +231,12 @@ class Main():
                 self.cam.release_camera()
                 break
 
-    def run_video_relative(self, marker_id=1, relative_source_path="test_images_1920x1080/capture_2.png", video_path="test_videos_1920x1080/test1.mp4", loop=True):
+    def run_video_relative(self, marker_id=1, relative_source_path="test_images_1920x1080/capture_2.png", video_path="test_videos_1920x1080/test1.mp4", shape="cube", loop=True):
         print("\nRunning Video")
 
         self.calculate_relative_dict(relative_source_path, marker_id)
 
-        cap = cv2.VideoCapture("ui/"+video_path)
+        cap = cv2.VideoCapture("src/betabank/ui/"+video_path)
         delay = int((1/cap.get(5))*(1000/3))
         while cap.isOpened():
             ret, frame = cap.read()
@@ -250,10 +250,27 @@ class Main():
 
             origin_rvec, origin_tvec = self.frame_analyser.find_origin_for_frame(frame, self.relative_frame_data)
 
-            self.view.render_origin(frame, ret, origin_rvec, origin_tvec)
+            self.view.render_origin(frame, ret, origin_rvec, origin_tvec, shape)
 
             if cv2.waitKey(delay) & 0xFF == ord('q'):
                 cap.release()
+                break
+
+    def run_image_relative(self, marker_id=1, relative_source_path="test_images_1920x1080/capture_2.png", image_path="test_images_1920x1080/capture_2.png", shape="cube"):
+        print("\nRunning Realtime")
+
+        self.calculate_relative_dict(relative_source_path, marker_id)
+
+        frame = cv2.imread("src/betabank/ui/"+image_path)
+        ret = True
+
+        while True:
+            origin_rvec, origin_tvec = self.frame_analyser.find_origin_for_frame(frame, self.relative_frame_data)
+
+            self.view.render_origin(frame, ret, origin_rvec, origin_tvec, shape)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.cam.release_camera()
                 break
 
 if __name__ == "__main__":
@@ -282,13 +299,27 @@ if __name__ == "__main__":
             if len(sys.argv) > 2:
                 if len(sys.argv) > 3:
                     if len(sys.argv) > 4:
-                        main.run_video_relative(relative_source_path=sys.argv[2], video_path=sys.argv[3], loop=sys.argv[4])
+                        if len(sys.argv) > 5:
+                            main.run_video_relative(relative_source_path=sys.argv[2], video_path=sys.argv[3], shape=sys.argv[4], loop=sys.argv[5])
+                        else:
+                            main.run_video_relative(relative_source_path=sys.argv[2], video_path=sys.argv[3], shape=sys.argv[4])
                     else:
                         main.run_video_relative(relative_source_path=sys.argv[2], video_path=sys.argv[3])
                 else:
                     main.run_video_relative(relative_source_path=sys.argv[2])
             else:
                 main.run_video_relative()
+        elif sys.argv[1] == "image":
+            if len(sys.argv) > 2:
+                if len(sys.argv) > 3:
+                    if len(sys.argv) > 4:
+                            main.run_image_relative(relative_source_path=sys.argv[2], image_path=sys.argv[3], shape=sys.argv[4])
+                    else:
+                        main.run_image_relative(relative_source_path=sys.argv[2], image_path=sys.argv[3])
+                else:
+                    main.run_image_relative(relative_source_path=sys.argv[2])
+            else:
+                main.run_image_relative()
     else:
         # Default to ThreeJS
 
