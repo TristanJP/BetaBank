@@ -113,15 +113,15 @@ class Frame_Analyser:
         rvec2, tvec2 = rvec2.reshape((3, 1)), tvec2.reshape((3, 1))
 
         # Inverse the second marker, the right one in the image
-        invRvec, invTvec = self.inverse_perspective(rvec2, tvec2)
+        inv_rvec, inv_tvec = self.inverse_perspective(rvec2, tvec2)
 
-        data = cv2.composeRT(rvec1, tvec1, invRvec, invTvec)
-        composedRvec, composedTvec = data[0], data[1]
+        composed_data = cv2.composeRT(rvec1, tvec1, inv_rvec, inv_tvec)
+        composed_rvec, composed_tvec = composed_data[0], composed_data[1]
 
-        composedRvec = composedRvec.reshape((3, 1))
-        composedTvec = composedTvec.reshape((3, 1))
+        composed_rvec = composed_rvec.reshape((3, 1))
+        composed_tvec = composed_tvec.reshape((3, 1))
 
-        return composedRvec, composedTvec
+        return composed_rvec, composed_tvec
 
     # Gets a dictionary of pose for all amrkers relative to the origin marker
     def get_relative_dict(self, frame_data, origin_marker_id):

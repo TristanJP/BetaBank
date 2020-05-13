@@ -22,6 +22,22 @@ class TestFrameAnalyser(unittest.TestCase):
         self.assertTrue(np.allclose(inverse_rvecs, correct_inverse_rvecs))
         self.assertTrue(np.allclose(inverse_tvecs, correct_inverse_tvecs))
 
+    def test_relative_pose(self):
+        frame_analyser = Frame_Analyser(None)
+
+        test_rvecs1 = np.array([20.0,10.0,0.0])
+        test_tvecs1 = np.array([1.0,1.5,0.5])
+        test_rvecs2 = np.array([25.0,15.0,5.0])
+        test_tvecs2 = np.array([2.0,1.0,0.5])
+
+        composed_rvec, composed_tvec = frame_analyser.relative_position(test_rvecs1, test_tvecs1, test_rvecs2, test_tvecs2)
+
+        correct_relative_rvecs = np.matrix([[-0.73359826], [-0.64870041], [0.17446731]])
+        correct_relative_tvecs = np.matrix([[-0.45074618], [-0.67246224], [0.77111764]])
+
+        self.assertTrue(np.allclose(composed_rvec, correct_relative_rvecs))
+        self.assertTrue(np.allclose(composed_tvec, correct_relative_tvecs))
+
     def test_on_frame(self):
         cam = Camera()
         view = View(cam.get_calibration_data())
