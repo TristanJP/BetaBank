@@ -103,9 +103,9 @@ class Frame_Analyser:
     def inverse_perspective(self, rvec, tvec):
         R, _ = cv2.Rodrigues(rvec)
         R = np.matrix(R).T
-        invTvec = np.dot(-R, np.matrix(tvec))
-        invRvec, _ = cv2.Rodrigues(R)
-        return invRvec, invTvec
+        inv_tvec = np.dot(-R, np.matrix(tvec))
+        inv_rvec, _ = cv2.Rodrigues(R)
+        return inv_rvec, inv_tvec
 
     def relative_position(self, rvec1, tvec1, rvec2, tvec2):
         # Gets (r/tvecs) relative to each other
