@@ -1,7 +1,7 @@
 import unittest
-from frame_analyser import Frame_Analyser
-from view import View
-from camera import Camera
+from .frame_analyser import Frame_Analyser
+from .view import View
+from .camera import Camera
 import numpy as np
 import cv2
 
@@ -28,8 +28,8 @@ class TestFrameAnalyser(unittest.TestCase):
         frame_analyser = Frame_Analyser(cam.get_calibration_data())
 
         # Get frame images etc.
-        frame_path = "test_images_1920x1080/capture_0.png"
-        alt_frame_path = "test_images_1920x1080/capture_1.png"
+        frame_path = "src/betabank/ui/test_images_1920x1080/testing/capture_0.png"
+        alt_frame_path = "src/betabank/ui/test_images_1920x1080/testing/capture_1.png"
         frame = cv2.imread(frame_path)
         alt_frame = cv2.imread(alt_frame_path)
 

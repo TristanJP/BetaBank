@@ -1,5 +1,5 @@
 import unittest
-from main import Main
+from .main import Main
 import numpy as np
 import cv2
 
