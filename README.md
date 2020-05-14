@@ -1,5 +1,5 @@
 # BetaBank
-FYP
+FYP - Augmented Reality climbing videos display using OpenCV and ArUco.
 
 ## Setup
 Python3 and Pip should be installed. Install remaining dependecies with:
