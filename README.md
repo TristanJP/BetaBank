@@ -5,7 +5,7 @@ FYP - Augmented Reality climbing videos display using OpenCV and ArUco.
 Python3 and Pip should be installed. Install remaining dependecies with:
 ```
 python -m pip install -r requirements.txt
-Note: It is recommended to install dependencies in an activated venv
+Note: It is recommended to install dependencies in an activated virtual environment (venv)
 ```
 
 ### Create and Activate Venv
