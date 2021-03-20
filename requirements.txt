@@ -9,7 +9,7 @@ cycler==0.10.0
 gitdb==4.0.5
 GitPython==3.1.2
 idna==2.9
-Jinja2==2.11.2
+Jinja2==2.11.3
 jinja2-time==0.2.0
 kiwisolver==1.2.0
 MarkupSafe==1.1.1
